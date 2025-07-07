@@ -24,15 +24,5 @@ export async function getSearchResults(subj: string, searchString: string) {
     }
   }
 
-  return data
-    .filter((word) => normalizeString(word).includes(normalizedSearchStr))
-    .sort((wordA, wordB) => {
-      const startsA = normalizeString(wordA).startsWith(normalizedSearchStr);
-      const startsB = normalizeString(wordB).startsWith(normalizedSearchStr);
-
-      if (startsA === startsB) return wordA.localeCompare(wordB);
-
-      return startsA ? -1 : 1;
-    })
-    .slice(0, 50);
+  return data;
 }

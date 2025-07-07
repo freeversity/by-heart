@@ -1,7 +1,7 @@
 import { styled } from '@linaria/react';
 import { Divider, Flex, Layout } from 'antd';
 import type { FC, ReactNode } from 'react';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { DefSearch } from '../DefSearch';
 import { LogoIcon } from '../Logo/Logo';
 
@@ -15,7 +15,9 @@ export const PageLayout: FC<{
     <SLayout className={className}>
       <SHeader>
         <Flex justify="space-between">
-          <SLogo />
+          <Link to="/">
+            <SLogo />
+          </Link>
           <Divider type="vertical" orientation="center" />
           {subj && <DefSearch subj={subj} />}
         </Flex>
@@ -25,13 +27,6 @@ export const PageLayout: FC<{
   );
 };
 
-const SLayout = styled(Layout)`
-  overflow: hidden;
-  width: 'calc(50% - 8px)';
-  max-width: 'calc(50% - 8px)';
-  min-height: 100dvh;
-`;
-
 const SHeader = styled(Layout.Header)`
   text-align: center;
   color: #fff;
@@ -39,11 +34,22 @@ const SHeader = styled(Layout.Header)`
   padding-inline: 48px;
   line-height: 64px;
   background-color: #4096ff;
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+`;
+
+const SLogo = styled(LogoIcon)``;
+
+const SLayout = styled(Layout)`
+  overflow: hidden;
+  width: 'calc(50% - 8px)';
+  max-width: 'calc(50% - 8px)';
+  min-height: 100dvh;
 `;
 
 const SContent = styled(Layout.Content)`
   text-align: center;
   min-height: 120px;
+  padding: 74px 20px 20px;
 `;
-
-const SLogo = styled(LogoIcon)``;

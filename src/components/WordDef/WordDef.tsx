@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { Button, Card, Flex } from 'antd';
+import { Button, Card, Divider, Flex } from 'antd';
 import { type FC, useRef } from 'react';
 import type { WordDefinition } from '../../api/defs';
 import { Colors } from '../../consts/colors';
@@ -16,7 +16,8 @@ export const WordDef: FC<{
   const audioRef = useRef<HTMLAudioElement>(null);
 
   return (
-    <Card
+    <SCard
+      className={className}
       title={
         <>
           <DefHeading>
@@ -36,31 +37,40 @@ export const WordDef: FC<{
             >
               {audio ? '🔊' : '🤖'}
             </VoiceBtn>
-          </DefHeading>
-          <IpasList component="ul" justify="center">
-            {def.ipas.map((ipa) => (
-              <IpaItem key={ipa}>{ipa}</IpaItem>
-            ))}
             {audio && (
               <audio ref={audioRef}>
                 <source src={audio?.url} />
               </audio>
             )}
+          </DefHeading>
+          <IpasList component="ul" justify="center">
+            {def.ipas.map((ipa) => (
+              <IpaItem key={ipa}>{ipa}</IpaItem>
+            ))}
           </IpasList>
         </>
       }
-      className={className}
     >
       {def.types && (
         <div>
-          {def.types.map((type) => (
-            <WordTypeInfo key={type.type} type={type} />
+          {def.types.map((type, index, types) => (
+            <div key={type.type}>
+              <SWordTypeInfo type={type} />
+              {index < types.length - 1 && <Divider />}
+            </div>
           ))}
         </div>
       )}
-    </Card>
+    </SCard>
   );
 };
+
+const SCard = styled(Card)`
+  .ant-collapse-header-text {
+    width:100%;
+  }
+`;
+
 const VoiceBtn = styled(Button)`
   font-size: 14px;
 `;
@@ -80,7 +90,7 @@ const IpasList = styled(Flex)`
 `;
 
 const IpaItem = styled.li`
-  margin: 0 10px;
+  margin: 0 4px;
 
   &:not(:last-child)::after {
     margin-left: 8px;
@@ -90,19 +100,7 @@ const IpaItem = styled.li`
   }
 `;
 
-const TypeHeading = styled.h2`
-  text-align: left;
-
+const SWordTypeInfo = styled(WordTypeInfo)`
   
-`;
-
-const FromLabel = styled.span`
-    color: ${Colors.greys[2]};
-    font-size: 0.8em;
-    font-weight: 400;
-    font-style: italic;
-`;
-
-const TransList = styled.ul`
-  text-align: left;
+  width: 100%;
 `;

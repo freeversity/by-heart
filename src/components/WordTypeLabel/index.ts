@@ -1,0 +1,1 @@
+export { WordTypeLabel } from './WordTypeLabel';

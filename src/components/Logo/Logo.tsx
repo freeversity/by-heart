@@ -33,7 +33,7 @@ const SLabel = styled.span`
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-15%, -45%);
+    transform: translate(0, -45%);
     font-family: "Rambla", sans-serif;
     font-weight: 400;
     font-size: 22px;

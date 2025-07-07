@@ -1,49 +1,41 @@
-import { grey } from '@ant-design/colors';
 import { styled } from '@linaria/react';
-import { Button, Card, Collapse, ColorPicker, Divider, Flex } from 'antd';
-import { type FC, useRef } from 'react';
+import { Collapse, Divider } from 'antd';
+import type { FC } from 'react';
 import type { WordDefinition } from '../../api/defs';
-import { Colors } from '../../consts/colors';
-import { speak } from '../../utils/speak';
+import { WikiHtml } from '../WikiHtml';
+import { WordTypeLabel } from '../WordTypeLabel';
 
 export const WordTypeInfo: FC<{
   type: WordDefinition['types'][0];
   className?: string;
-}> = ({ type: { type, forms, trans, initial, html }, className }) => {
-  const shortInfo = (
-    <>
-      <TypeHeading key={type}>
-        {type}{' '}
-        {forms && (
-          <FromLabel>
-            ({forms.map(({ g, n }) => `${g}, ${n}`).join('/')}){' '}
-            {!!initial?.length && (
-              <>
-                of <strong>{initial}</strong>
-              </>
-            )}
-          </FromLabel>
-        )}
-      </TypeHeading>
-      {!!trans?.length && (
-        <TransList>
-          {trans.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </TransList>
-      )}
-    </>
-  );
-
-  if (!html) return shortInfo;
+}> = ({ type, className }) => {
   return (
     <WikiCollapse
+      collapsible={type.html ? 'header' : 'disabled'}
+      className={className}
       ghost
       items={[
         {
-          label: shortInfo,
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: this is html from wiktionary
-          children: <div dangerouslySetInnerHTML={{ __html: html }} />,
+          label: (
+            <>
+              <TypeHeading key={type.type}>
+                {type.type} <WordTypeLabel type={type} />
+              </TypeHeading>
+              {!!type.trans?.length && (
+                <TransList>
+                  {type.trans.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </TransList>
+              )}
+            </>
+          ),
+          children: (
+            <>
+              <Divider />
+              <WikiHtml html={type.html} />
+            </>
+          ),
         },
       ]}
     />
@@ -53,13 +45,6 @@ export const WordTypeInfo: FC<{
 const TypeHeading = styled.h2`
   text-align: left;
   margin: 0;
-`;
-
-const FromLabel = styled.span`
-    color: ${Colors.greys[2]};
-    font-size: 0.8em;
-    font-weight: 400;
-    font-style: italic;
 `;
 
 const TransList = styled.ul`
