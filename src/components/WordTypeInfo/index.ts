@@ -1,0 +1,1 @@
+export { WordTypeInfo } from './WordTypeInfo';
