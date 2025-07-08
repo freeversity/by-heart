@@ -1,5 +1,49 @@
 import axios from 'axios';
 
+export const FrMod = {
+  Indc: 'indc',
+  Subj: 'subj',
+  Cond: 'cond',
+  Part: 'part',
+  Infn: 'inf',
+  Gern: 'gern',
+} as const;
+
+export type FrMod = (typeof FrMod)[keyof typeof FrMod];
+
+export const FrTense = {
+  Pres: 'pres',
+  PassC: 'pass-c',
+  Impf: 'impf',
+  Pqpf: 'pqpf',
+  PassS: 'pass-s',
+  PassA: 'pass-a',
+  Futr: 'futr',
+  FutrA: 'futr-a',
+  SubjPr: 'subj-pr',
+  SubjPs: 'subj-ps',
+  SubjIm: 'subj-im',
+  SubjPq: 'subj-pq',
+  CondPr: 'cond-pr',
+  CondPp: 'cond-pp',
+  CondPd: 'cond-pd',
+  ImprPr: 'impr-pr',
+  ImprPs: 'impr-ps',
+  PartPr: 'part-pr',
+  PartPs: 'part-ps',
+  InfnPr: 'inf-pr',
+  InfnPs: 'inf-ps',
+  GernPr: 'gern-pr',
+  GernPs: 'gern-ps',
+} as const;
+
+export type FrTense = (typeof FrTense)[keyof typeof FrTense];
+
+export interface WordConjugation {
+  mod: FrMod;
+  tenses: Array<{ tense: FrTense; forms: string[][] }>;
+}
+
 export interface WordDefinition {
   title: string;
   ipas: string[];
@@ -14,6 +58,8 @@ export interface WordDefinition {
         }>;
         trans?: string[];
         html?: string;
+        preps?: Array<{ rel: string; prep: string; ex: string }>;
+        conj?: undefined;
       }
     | {
         type: 'verb';
@@ -27,6 +73,8 @@ export interface WordDefinition {
         }>;
         trans?: string[];
         html?: string;
+        preps?: Array<{ rel: string; prep: string; ex: string }>;
+        conj?: WordConjugation[];
       }
   >;
 }

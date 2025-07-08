@@ -10,7 +10,8 @@ export const LogoIcon: FC<{ className?: string }> = ({ className }) => {
   return (
     <span className={cx(logoCx, className)}>
       <span>f</span>
-      <SLabel>❤️</SLabel>
+      <SLabel>♥</SLabel>
+      {/* <span>❤️</span> */}
     </span>
   );
 };
@@ -24,21 +25,14 @@ const logoCx = css`
     color: ${Colors.logoYellow};
     text-shadow: 3px 1px 0 ${Colors.logoBlue};
     font-size: 32px;
-    letter-spacing: -2px;
+    letter-spacing: -4px;
     text-transform: lowercase;
     line-height: 1;
 `;
 
 const SLabel = styled.span`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(0, -45%);
-    font-family: "Rambla", sans-serif;
-    font-weight: 400;
-    font-size: 22px;
-    letter-spacing: 0;
+    font-size: 20px;
     color: red;
-    font-style: normal;
-    text-shadow: 0 0 0 white;
+    font-style: italic;
+    text-shadow: 3px 0px 0 ${Colors.logoYellow};
 `;

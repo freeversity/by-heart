@@ -6,13 +6,13 @@ export async function getSearchResults(subj: string, searchString: string) {
 
   const setName = normalizedSearchStr
     .replaceAll(/[^a-zA-Z0-9]/g, '')
-    .slice(0, 2);
+    .slice(0, 3);
 
   let data: string[] = [];
 
   try {
     const response = await axios.get<string[]>(
-      `https://wiktionary.freeversity.io/v0/${subj}/search/${setName}.json`,
+      `https://wiktionary.freeversity.io/v0/${subj}/search/set-${setName}.json`,
     );
 
     data = response.data;

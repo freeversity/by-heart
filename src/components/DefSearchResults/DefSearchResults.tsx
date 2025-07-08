@@ -1,3 +1,4 @@
+import { styled } from '@linaria/react';
 import { List } from 'antd';
 import { useAtom } from 'jotai';
 import type { FC } from 'react';
@@ -20,9 +21,9 @@ export const DefSearchResults: FC<{
   return (
     <List className={className}>
       {results.map((word) => (
-        <List.Item key={word}>
-          <Link
-            to={`/defs/${subj}/${encodeURIComponent(word)}`}
+        <ListItem key={word}>
+          <LinkItem
+            to={`/subjs/${subj}/defs/${encodeURIComponent(word)}`}
             onClick={onClose}
           >
             {splitBySearchTerm(word, query).map(({ frag, match }, index) =>
@@ -34,9 +35,19 @@ export const DefSearchResults: FC<{
                 <span key={index}>{frag}</span>
               ),
             )}
-          </Link>
-        </List.Item>
+          </LinkItem>
+        </ListItem>
       ))}
     </List>
   );
 };
+
+const ListItem = styled(List.Item)`
+  padding: 0 !important;
+`;
+const LinkItem = styled(Link)`
+display: block;
+padding: 10px 0;
+  width: 100%;
+  height: 100%;
+`;
