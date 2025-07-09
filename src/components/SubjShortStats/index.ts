@@ -1,0 +1,1 @@
+export { SubjShortStats } from './SubjShortStats';

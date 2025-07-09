@@ -1,16 +1,19 @@
 import { styled } from '@linaria/react';
-import { Card, Collapse, Flex, List, Table, Typography } from 'antd';
+import { Collapse, Table } from 'antd';
 import type { FC } from 'react';
 import type { WordDefinition } from '../../api/defs';
+import { Colors } from '../../consts/colors';
 import { Conjugation } from '../Conjugation/Conjugation';
+import { LemmaLabel } from '../LemmaLabel/LemmaLabel';
 import { WikiHtml } from '../WikiHtml';
 import { WordTypeLabel } from '../WordTypeLabel';
 
 export const WordTypeInfo: FC<{
   type: WordDefinition['types'][0];
+  subj: string;
   className?: string;
   detailed?: boolean;
-}> = ({ type, className, detailed = true }) => {
+}> = ({ type, className, subj, detailed = true }) => {
   const items = [
     {
       label: 'Wiktionary',
@@ -46,7 +49,16 @@ export const WordTypeInfo: FC<{
   return (
     <div>
       <TypeHeading key={type.type}>
-        {type.type} <WordTypeLabel type={type} />
+        {type.type}{' '}
+        {type.initial && (
+          <>
+            <FormOfLabel>form of</FormOfLabel>{' '}
+            <LemmaLabel lemma={type.initial} subj={subj} />
+          </>
+        )}{' '}
+        <div>
+          <WordTypeLabel type={type} />
+        </div>
       </TypeHeading>
       {!!type.trans?.length && (
         <TransList>
@@ -60,7 +72,6 @@ export const WordTypeInfo: FC<{
           accordion
           collapsible={type.html ? 'header' : 'disabled'}
           className={className}
-          // ghost
           items={items}
         />
       )}
@@ -73,28 +84,22 @@ const TypeHeading = styled.h2`
   margin: 0;
 `;
 
+const FormOfLabel = styled.span`
+  color: ${Colors.greys[0]};
+  font-weight: normal;
+  font-style: italic;
+`;
+
 const TransList = styled.ul`
   text-align: left;
-  margin: 5px 0;
+  margin: 10px 0;
   padding-left: 20px;
 `;
 
 const WikiCollapse = styled(Collapse)`
-.ant-collapse-header-text {
-  text-align: left;
-}
-`;
+  margin: 10px 0;
 
-const ConjCard = styled(Card)`
-  flex-basis: 25%;
-  flex-grow: 1;
-  min-width: 200px;
-
-  .ant-card-body {
-    padding: 5px 12px;
+  .ant-collapse-header-text {
+    text-align: left;
   }
-`;
-
-const ConjListItem = styled(List.Item)`
-    padding: 5px 0 !important;
 `;

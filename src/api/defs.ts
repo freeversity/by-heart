@@ -46,12 +46,12 @@ export interface WordConjugation {
 
 export interface WordDefinition {
   title: string;
-  ipas: string[];
-  audios: Array<{ name: string; url: string }>;
+  ipas?: string[];
+  audios?: Array<{ name: string; url: string }>;
   types: Array<
     | {
         type: 'pronoun' | 'noun' | 'prep' | 'conj' | 'adj';
-        initial: string | string[] | null;
+        initial: string | null;
         forms: Array<{
           g: 'm' | 'f' | 'n';
           n: 's' | 'p';
@@ -63,7 +63,7 @@ export interface WordDefinition {
       }
     | {
         type: 'verb';
-        initial: string | string[] | null;
+        initial: string | null;
         forms: Array<{
           m: string;
           t: string;

@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { Button, Card, Divider, Flex } from 'antd';
+import { Button, Divider, Flex } from 'antd';
 import { type FC, useRef } from 'react';
 import type { WordDefinition } from '../../api/defs';
 import { Colors } from '../../consts/colors';
@@ -17,60 +17,49 @@ export const WordDef: FC<{
   const audioRef = useRef<HTMLAudioElement>(null);
 
   return (
-    <SCard
-      className={className}
-      title={
-        <>
-          <DefHeading>
-            {def.title}{' '}
-            <VoiceBtn
-              shape="circle"
-              size="middle"
-              onClick={() => {
-                const audio = audioRef.current;
+    <div className={className}>
+      <DefHeading>
+        {def.title}{' '}
+        <VoiceBtn
+          shape="circle"
+          size="middle"
+          onClick={() => {
+            const audio = audioRef.current;
 
-                if (audio) {
-                  audio.play();
-                } else {
-                  speak(def.title, lang);
-                }
-              }}
-            >
-              {audio ? '🔊' : '🤖'}
-            </VoiceBtn>
-            {audio && (
-              <audio ref={audioRef} key={audio.url}>
-                <source src={audio.url} />
-              </audio>
-            )}
-          </DefHeading>
-          <IpasList component="ul" justify="center">
-            {def.ipas?.map((ipa) => (
-              <IpaItem key={ipa}>{ipa}</IpaItem>
-            ))}
-          </IpasList>
-        </>
-      }
-    >
+            if (audio) {
+              audio.play();
+            } else {
+              speak(def.title, lang);
+            }
+          }}
+        >
+          {audio ? '🔊' : '🤖'}
+        </VoiceBtn>
+        {audio && (
+          <audio ref={audioRef} key={audio.url}>
+            <source src={audio.url} />
+          </audio>
+        )}
+      </DefHeading>
+      <IpasList component="ul" justify="center">
+        {def.ipas?.map((ipa) => (
+          <IpaItem key={ipa}>{ipa}</IpaItem>
+        ))}
+      </IpasList>
+      <Divider />
       {def.types && (
         <div>
           {def.types.map((type, index, types) => (
             <div key={type.type}>
-              <SWordTypeInfo detailed={detailed} type={type} />
+              <SWordTypeInfo subj={lang} detailed={detailed} type={type} />
               {index < types.length - 1 && <Divider />}
             </div>
           ))}
         </div>
       )}
-    </SCard>
+    </div>
   );
 };
-
-const SCard = styled(Card)`
-  .ant-collapse-header-text {
-    width:100%;
-  }
-`;
 
 const VoiceBtn = styled(Button)`
   font-size: 14px;
@@ -102,6 +91,5 @@ const IpaItem = styled.li`
 `;
 
 const SWordTypeInfo = styled(WordTypeInfo)`
-  
   width: 100%;
 `;

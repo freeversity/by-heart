@@ -1,4 +1,5 @@
 import { styled } from '@linaria/react';
+import { Card } from 'antd';
 import { useAtom } from 'jotai';
 import type { FC } from 'react';
 import { useParams } from 'react-router';
@@ -17,12 +18,14 @@ export const Definition: FC = () => {
 
   return (
     <PageLayout>
-      <SWordDef def={def} lang={subj} />
+      <SCard>
+        <WordDef def={def} lang={subj} />
+      </SCard>
     </PageLayout>
   );
 };
 
-const SWordDef = styled(WordDef)`
+const SCard = styled(Card)`
   width: 100%;
   max-width: 800px;
   margin: 0 auto;

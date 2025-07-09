@@ -5,6 +5,8 @@ import { useAtom } from 'jotai';
 import { type FC, useMemo } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { PageLayout } from '../components/PageLayout';
+import { SubjShortStats } from '../components/SubjShortStats';
+import { TermLink } from '../components/TermLink/TermLink';
 import { useListId, useSubj } from '../hook/useSubj';
 import { currentListAtom } from '../state/currentList/atoms';
 import { DEF_PAGE_SIZE } from '../state/definitions/atoms';
@@ -32,6 +34,8 @@ export const DefList: FC = () => {
   return (
     <PageLayout>
       <Typography.Title level={2}>{listsTitles[listId]}</Typography.Title>
+
+      <Stats subj={subj} list={list} />
       <Flex justify="center" gap="10px">
         <Button
           color="blue"
@@ -52,16 +56,13 @@ export const DefList: FC = () => {
           Play reverse
         </Button>
       </Flex>
-      <Typography.Title level={2}>Definitions</Typography.Title>
+      <Typography.Title level={2}>
+        Definitions ({Intl.NumberFormat().format(list.length)})
+      </Typography.Title>
 
       <Flex wrap="wrap" gap="5px 15px">
         {pageItems.map((def) => (
-          <WordLink
-            key={def}
-            to={`/subjs/${subj}/defs/${encodeURIComponent(def)}`}
-          >
-            {def}
-          </WordLink>
+          <TermLink key={def} term={def} subj={subj} />
         ))}
       </Flex>
       <Flex justify="center">
@@ -81,16 +82,10 @@ export const DefList: FC = () => {
   );
 };
 
-export const DefSkeleton = styled(Skeleton.Button)`
-  display: inline-block;
-  height: 1.2em !important;
-  width: 120px;
+const Stats = styled(SubjShortStats)`
+  margin-bottom: 15px;
 `;
 
-export const PagesControl = styled(Pagination)`
+const PagesControl = styled(Pagination)`
   padding: 20px 0;
-`;
-
-const WordLink = styled(Link)`
-    text-decoration: underline;
 `;

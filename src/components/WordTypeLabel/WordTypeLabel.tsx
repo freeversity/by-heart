@@ -10,7 +10,7 @@ export const WordTypeLabel: FC<{
   if (!type.forms && !type.initial) return null;
 
   return (
-    <FromLabel>
+    <FormLabel>
       {('noun' === type.type ||
         'pronoun' === type.type ||
         'adj' === type.type) &&
@@ -21,16 +21,11 @@ export const WordTypeLabel: FC<{
             [p, n, t, m].filter((item) => !!item).join('/'),
           )
           .join(', ')}{' '}
-      {!!type.initial?.length && (
-        <>
-          of <strong>{type.initial}</strong>
-        </>
-      )}
-    </FromLabel>
+    </FormLabel>
   );
 };
 
-const FromLabel = styled.span`
+const FormLabel = styled.span`
     color: ${Colors.greys[2]};
     font-size: 0.8em;
     font-weight: 400;

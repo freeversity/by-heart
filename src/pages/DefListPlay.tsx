@@ -1,16 +1,13 @@
-import {
-  CloseCircleFilled,
-  CloseOutlined,
-  InfoCircleOutlined,
-} from '@ant-design/icons';
+import { CloseOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { styled } from '@linaria/react';
 import { Button, Card, Divider, Drawer, Flex } from 'antd';
-import Dexie from 'dexie';
 import { useAtom } from 'jotai';
 import { type FC, Suspense, useEffect, useState } from 'react';
 import { FlashCard } from '../components/FlashCard';
 import { FlippedCard } from '../components/FlippedCard/FlippedCard';
 import { PageLayout } from '../components/PageLayout';
+import { SubjShortStats } from '../components/SubjShortStats';
+import { Timer } from '../components/Timer/Timer';
 import { db } from '../db';
 import { useRefCallback } from '../hook/useRefCallback';
 import { useListId, useMode, useSubj } from '../hook/useSubj';
@@ -163,6 +160,8 @@ export const DefListPlay: FC = () => {
         </Flex>
       }
     >
+      <SubjShortStats subj={subj} list={list} />
+      <STimer />
       <Content justify="center" align="center">
         {!isFlipped && def && (
           <DefCard>
@@ -174,6 +173,7 @@ export const DefListPlay: FC = () => {
               variant="solid"
               size="large"
               color="primary"
+              disabled={!def}
               onClick={() => {
                 setFlipped((isFlipped) => !isFlipped);
               }}
@@ -184,7 +184,9 @@ export const DefListPlay: FC = () => {
         )}
         {isFlipped && def && (
           <Suspense fallback="Loading...">
-            <FlippedCardContent detailed={false} def={def} subj={subj} />
+            <FlippedCardWrapper>
+              <FlippedCardContent detailed={false} def={def} subj={subj} />
+            </FlippedCardWrapper>
             <Flex gap="10px">
               <Button
                 variant="solid"
@@ -216,6 +218,9 @@ export const DefListPlay: FC = () => {
           placement="bottom"
           open={showFull}
           closable={false}
+          onClose={() => {
+            setShowFull(false);
+          }}
         >
           <Suspense>
             <FullInfoCard def={def} subj={subj} />
@@ -246,15 +251,19 @@ const Content = styled(Flex)`
 `;
 
 const DefCard = styled(Card)`
-    max-width: fit-content;
+    width: fit-content;
+    min-width: 300px;
 `;
 
 const FlashCardContent = styled(FlashCard)`
     width: 300px;
 `;
 
-const FlippedCardContent = styled(FlippedCard)`
+const FlippedCardWrapper = styled(Card)`
     max-width: 600px;
+    width: 100%;
+`;
+const FlippedCardContent = styled(FlippedCard)`
     width: 100%;
 `;
 
@@ -268,4 +277,8 @@ const CloseDrawerButton = styled(Button)`
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
+`;
+
+const STimer = styled(Timer)`
+    margin: 5px 0;
 `;

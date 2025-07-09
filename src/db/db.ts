@@ -12,6 +12,15 @@ export interface ListTerm {
   term: string;
 }
 
+export const Status = {
+  Unknown: 'unknown',
+  Awared: 'awared',
+  Mastered: 'mastered',
+  Excluded: 'excluded',
+} as const;
+
+export type Status = (typeof Status)[keyof typeof Status];
+
 export interface DefStatus {
   subj: string;
   term: string;
@@ -20,6 +29,7 @@ export interface DefStatus {
   timestamp: number;
   def: string;
 }
+
 export interface DefProgressEvent {
   id: number;
   subj: string;
