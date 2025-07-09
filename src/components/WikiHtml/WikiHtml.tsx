@@ -11,7 +11,10 @@ export const WikiHtml: FC<{ html?: string; className?: string }> = ({
     if (e.target instanceof HTMLAnchorElement) {
       e.preventDefault();
 
-      window.open(`https://en.wiktionary.com/${e.target.href}`, '_brank');
+      window.open(
+        `https://en.wiktionary.com${e.target.getAttribute('href')}`,
+        '_brank',
+      );
     }
   };
   return (
