@@ -14,7 +14,7 @@ function App() {
         <Routes>
           <Route path="/subjs/:subj/defs/:def" element={<Definition />} />
           <Route
-            path="/subjs/:subj/lists/:listId/play/:mode"
+            path="/subjs/:subj/lists/:listId/play/*"
             element={<DefListPlay />}
           />
           <Route path="/subjs/:subj/lists/:listId" element={<DefList />} />

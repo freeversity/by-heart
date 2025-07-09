@@ -2,7 +2,7 @@ import { Flex } from 'antd';
 import { useAtom } from 'jotai';
 import type { FC } from 'react';
 import { useSearchParams } from 'react-router';
-import { useSubj } from '../../hook/useSubj';
+import { useSubj } from '../../hooks/useSubj';
 import { defsPageContent } from '../../state/definitions/atoms';
 import { TermLink } from '../TermLink/TermLink';
 

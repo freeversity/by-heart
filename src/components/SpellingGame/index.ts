@@ -1,0 +1,1 @@
+export { SpellingGame } from './SpellingGame';

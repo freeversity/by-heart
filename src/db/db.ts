@@ -39,12 +39,21 @@ export interface DefProgressEvent {
   timestamp: number;
   mode: string;
 }
+export interface GameDurationEvent {
+  id: number;
+  subj: string;
+  timestamp: number;
+  mode: string;
+  listId: string;
+  duration: number;
+}
 
 export const db = new Dexie('lists') as Dexie & {
   lists: EntityTable<ListTerm>;
   terms: EntityTable<Term>;
   progress: EntityTable<DefProgressEvent, 'id'>;
   statuses: EntityTable<DefStatus>;
+  durations: EntityTable<GameDurationEvent, 'id'>;
 };
 
 db.version(2).stores({
@@ -52,4 +61,5 @@ db.version(2).stores({
   terms: '[subj+term+def]',
   progress: '++id, subj, def, status, timestamp, mode, term',
   statuses: '[subj+mode+term+def], status, term, timestamp, subj, def, mode',
+  durations: '++id, subj, mode, listId, timestamp, duration',
 });

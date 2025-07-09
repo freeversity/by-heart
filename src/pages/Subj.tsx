@@ -5,7 +5,7 @@ import { type FC, Suspense } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router';
 import { DefsPages } from '../components/DefsPages/DefsPages';
 import { PageLayout } from '../components/PageLayout';
-import { useSubj } from '../hook/useSubj';
+import { useSubj } from '../hooks/useSubj';
 import { DEF_PAGE_SIZE, totalDefsCount } from '../state/definitions/atoms';
 
 const listsBySubj: Record<string, { list: string; title: string }[]> = {

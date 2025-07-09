@@ -1,13 +1,17 @@
-import { PlayCircleFilled, ReloadOutlined } from '@ant-design/icons';
+import {
+  EditOutlined,
+  PlayCircleFilled,
+  ReloadOutlined,
+} from '@ant-design/icons';
 import { styled } from '@linaria/react';
-import { Button, Flex, Pagination, Skeleton, Typography } from 'antd';
+import { Button, Flex, Pagination, Skeleton, Table, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, useMemo } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { PageLayout } from '../components/PageLayout';
 import { SubjShortStats } from '../components/SubjShortStats';
 import { TermLink } from '../components/TermLink/TermLink';
-import { useListId, useSubj } from '../hook/useSubj';
+import { useListId, useSubj } from '../hooks/useSubj';
 import { currentListAtom } from '../state/currentList/atoms';
 import { DEF_PAGE_SIZE } from '../state/definitions/atoms';
 
@@ -35,6 +39,7 @@ export const DefList: FC = () => {
     <PageLayout>
       <Typography.Title level={2}>{listsTitles[listId]}</Typography.Title>
 
+      <Table pagination={false} />
       <Stats subj={subj} list={list} />
       <Flex justify="center" gap="10px">
         <Button
@@ -54,6 +59,15 @@ export const DefList: FC = () => {
           }}
         >
           Play reverse
+        </Button>
+        <Button
+          color="blue"
+          icon={<EditOutlined />}
+          onClick={() => {
+            navigate(`/subjs/${subj}/lists/${listId}/play/spelling`);
+          }}
+        >
+          Spelling bee
         </Button>
       </Flex>
       <Typography.Title level={2}>

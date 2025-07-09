@@ -1,12 +1,9 @@
-import {
-  CloseOutlined,
-  InfoCircleFilled,
-  InfoOutlined,
-} from '@ant-design/icons';
+import { CloseOutlined, InfoOutlined } from '@ant-design/icons';
 import { styled } from '@linaria/react';
 import { Button, Flex, Modal } from 'antd';
 import { type FC, Suspense, useState } from 'react';
 import { Colors } from '../../consts/colors';
+import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FlippedCard } from '../FlippedCard/FlippedCard';
 
 export const LemmaLabel: FC<{
@@ -28,6 +25,7 @@ export const LemmaLabel: FC<{
         <InfoOutlined />
       </Button>
       <Modal
+        closable={false}
         okText={null}
         open={isOpen}
         onCancel={() => {
@@ -48,9 +46,11 @@ export const LemmaLabel: FC<{
           </Flex>
         }
       >
-        <Suspense>
-          <FlippedCard def={lemma} subj={subj} />
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense>
+            <FlippedCard def={lemma} subj={subj} />
+          </Suspense>
+        </ErrorBoundary>
       </Modal>
     </>
   );

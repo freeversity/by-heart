@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { Button, Flex } from 'antd';
+import { Button, Flex, Skeleton } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, useRef } from 'react';
 import { Colors } from '../../consts/colors';
@@ -10,7 +10,8 @@ export const FlashCard: FC<{
   def: string;
   subj: string;
   className?: string;
-}> = ({ def, subj, className }) => {
+  hidden?: boolean;
+}> = ({ def, subj, className, hidden }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [defPayload] = useAtom(definitionAtom({ subj, def }));
 
@@ -19,7 +20,7 @@ export const FlashCard: FC<{
   return (
     <div className={className}>
       <DefHeading>
-        {defPayload.title}{' '}
+        {hidden ? <HiddenTitle /> : defPayload.title}{' '}
         <VoiceBtn
           shape="circle"
           size="middle"
@@ -77,4 +78,9 @@ const IpaItem = styled.li`
     content: '•';
     color: ${Colors.greys[0]};
   }
+`;
+
+const HiddenTitle = styled(Skeleton.Input)`
+  
+  margin: 5px 0;
 `;
