@@ -4,10 +4,10 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import { styled } from '@linaria/react';
-import { Button, Flex, Pagination, Skeleton, Table, Typography } from 'antd';
+import { Button, Flex, Pagination, Table, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, useMemo } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { PageLayout } from '../components/PageLayout';
 import { SubjShortStats } from '../components/SubjShortStats';
 import { TermLink } from '../components/TermLink/TermLink';
@@ -38,9 +38,18 @@ export const DefList: FC = () => {
   return (
     <PageLayout>
       <Typography.Title level={2}>{listsTitles[listId]}</Typography.Title>
-
-      <Table pagination={false} />
-      <Stats subj={subj} list={list} />
+      <Stats gap="20px" justify="center" align="center">
+        <PlayCircleFilled />
+        <SubjShortStats subj={subj} list={list} mode="forward" />
+      </Stats>
+      <Stats gap="20px" justify="center" align="center">
+        <ReloadOutlined />
+        <SubjShortStats subj={subj} list={list} mode="reverse" />
+      </Stats>
+      <Stats gap="20px" justify="center" align="center">
+        <EditOutlined />
+        <SubjShortStats subj={subj} list={list} mode="spelling" />
+      </Stats>
       <Flex justify="center" gap="10px">
         <Button
           color="blue"
@@ -96,7 +105,7 @@ export const DefList: FC = () => {
   );
 };
 
-const Stats = styled(SubjShortStats)`
+const Stats = styled(Flex)`
   margin-bottom: 15px;
 `;
 

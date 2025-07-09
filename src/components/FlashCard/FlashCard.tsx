@@ -81,6 +81,5 @@ const IpaItem = styled.li`
 `;
 
 const HiddenTitle = styled(Skeleton.Input)`
-  
   margin: 5px 0;
 `;
