@@ -11,7 +11,15 @@ export function useSubj() {
 export function useListId() {
   const { listId } = useParams();
 
-  if (!listId) throw new Error('Subject is not defined!');
+  if (!listId) throw new Error('List Id is not defined!');
 
   return listId;
+}
+
+export function useMode() {
+  const { mode } = useParams();
+
+  if (!mode) throw new Error('Play mode is not defined!');
+
+  return mode;
 }

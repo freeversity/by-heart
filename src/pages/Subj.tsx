@@ -2,15 +2,11 @@ import { styled } from '@linaria/react';
 import { Flex, List, Pagination, Skeleton, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, Suspense } from 'react';
-import { Link, Navigate } from 'react-router';
+import { Link, Navigate, useSearchParams } from 'react-router';
 import { DefsPages } from '../components/DefsPages/DefsPages';
 import { PageLayout } from '../components/PageLayout';
 import { useSubj } from '../hook/useSubj';
-import {
-  DEF_PAGE_SIZE,
-  defsPage,
-  totalDefsCount,
-} from '../state/definitions/atoms';
+import { DEF_PAGE_SIZE, totalDefsCount } from '../state/definitions/atoms';
 
 const listsBySubj: Record<string, { list: string; title: string }[]> = {
   fr: [
@@ -24,7 +20,9 @@ const listsBySubj: Record<string, { list: string; title: string }[]> = {
 export const Subj: FC = () => {
   const subj = useSubj();
 
-  const [defPage, setDefPage] = useAtom(defsPage);
+  const [params, setParams] = useSearchParams();
+
+  const page = +(params.get('page') ?? 1);
 
   const [totalPages] = useAtom(totalDefsCount(subj));
 
@@ -63,9 +61,11 @@ export const Subj: FC = () => {
           pageSize={DEF_PAGE_SIZE}
           showSizeChanger={false}
           total={totalPages}
-          current={defPage}
+          current={page}
           onChange={(page) => {
-            setDefPage(page);
+            const params = new URLSearchParams([['page', `${page}`]]);
+
+            setParams(params);
           }}
         />
       </Flex>

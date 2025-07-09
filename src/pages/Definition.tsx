@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { useParams } from 'react-router';
 import { PageLayout } from '../components/PageLayout';
 import { WordDef } from '../components/WordDef';
-import { currentDefAtom } from '../state/currentDef/atoms';
+import { definitionAtom } from '../state/currentDef/atoms';
 
 export const Definition: FC = () => {
   const { def: defEncoded, subj } = useParams();
@@ -13,7 +13,7 @@ export const Definition: FC = () => {
 
   const defName = decodeURIComponent(defEncoded);
 
-  const [def] = useAtom(currentDefAtom({ def: defName, subj }));
+  const [def] = useAtom(definitionAtom({ def: defName, subj }));
 
   return (
     <PageLayout>

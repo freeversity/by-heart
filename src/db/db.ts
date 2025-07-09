@@ -12,23 +12,23 @@ export interface ListTerm {
   term: string;
 }
 
-export interface TermProgress {
+export interface DefProgressEvent {
+  id: number;
   subj: string;
-  term: string;
-  added: number;
-  awared: number;
-  mastered: number;
-  excluded: number;
+  def: string;
+  status: 'unknown' | 'awared' | 'mastered' | 'excluded';
+  timestamp: number;
+  mode: string;
 }
 
 export const db = new Dexie('lists') as Dexie & {
   lists: EntityTable<ListTerm>;
   terms: EntityTable<Term>;
-  progress: EntityTable<TermProgress>;
+  progress: EntityTable<DefProgressEvent, 'id'>;
 };
 
 db.version(1).stores({
   lists: 'subj, list, term',
   terms: 'subj, term, def',
-  progress: 'subj, term, added, awared, mastered, ecluded',
+  progress: '++id, subj, status, timestamp',
 });

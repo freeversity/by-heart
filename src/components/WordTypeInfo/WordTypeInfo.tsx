@@ -9,7 +9,8 @@ import { WordTypeLabel } from '../WordTypeLabel';
 export const WordTypeInfo: FC<{
   type: WordDefinition['types'][0];
   className?: string;
-}> = ({ type, className }) => {
+  detailed?: boolean;
+}> = ({ type, className, detailed = true }) => {
   const items = [
     {
       label: 'Wiktionary',
@@ -54,13 +55,15 @@ export const WordTypeInfo: FC<{
           ))}
         </TransList>
       )}
-      <WikiCollapse
-        accordion
-        collapsible={type.html ? 'header' : 'disabled'}
-        className={className}
-        // ghost
-        items={items}
-      />
+      {detailed && (
+        <WikiCollapse
+          accordion
+          collapsible={type.html ? 'header' : 'disabled'}
+          className={className}
+          // ghost
+          items={items}
+        />
+      )}
     </div>
   );
 };

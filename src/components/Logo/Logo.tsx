@@ -9,9 +9,8 @@ import { Colors } from '../../consts/colors';
 export const LogoIcon: FC<{ className?: string }> = ({ className }) => {
   return (
     <span className={cx(logoCx, className)}>
-      <span>f</span>
-      <SLabel>♥</SLabel>
-      {/* <span>❤️</span> */}
+      <SLabel>♥</SLabel> <span>f</span>
+      <span>v</span>
     </span>
   );
 };
@@ -25,14 +24,15 @@ const logoCx = css`
     color: ${Colors.logoYellow};
     text-shadow: 3px 1px 0 ${Colors.logoBlue};
     font-size: 32px;
-    letter-spacing: -4px;
+    letter-spacing: -2px;
     text-transform: lowercase;
     line-height: 1;
+    vertical-align: middle;
 `;
 
 const SLabel = styled.span`
-    font-size: 20px;
-    color: red;
-    font-style: italic;
-    text-shadow: 3px 0px 0 ${Colors.logoYellow};
+  color: red;
+  font-style: italic;
+  text-shadow: 3px 1px 0 ${Colors.logoYellow}, 6px 2px 0 ${Colors.logoBlue};
+  vertical-align: baseline;
 `;

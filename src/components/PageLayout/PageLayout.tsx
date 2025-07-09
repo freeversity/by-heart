@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { Divider, Flex, Layout } from 'antd';
+import { Flex, Layout } from 'antd';
 import type { FC, ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { DefSearch } from '../DefSearch';
@@ -9,25 +9,40 @@ export const PageLayout: FC<{
   className?: string;
   children: ReactNode;
   header?: ReactNode;
-}> = ({ className, children }) => {
+  footer?: ReactNode;
+}> = ({ className, children, header, footer }) => {
   const { subj } = useParams();
+
   return (
-    <SLayout className={className}>
+    <SLayout className={className} data-footer={!!footer}>
       <SHeader>
-        <Flex justify="space-between">
+        <HeaderContent justify="space-between">
           <Link to="/">
             <SLogo />
           </Link>
-          <Divider type="vertical" orientation="center" />
+          {header}
           {subj && <DefSearch subj={subj} />}
-        </Flex>
+        </HeaderContent>
       </SHeader>
       <SContent>{children}</SContent>
+      {footer && <SFooter>{footer}</SFooter>}
     </SLayout>
   );
 };
 
+const SLayout = styled(Layout)`
+  overflow: hidden;
+  width: 'calc(50% - 8px)';
+  max-width: 'calc(50% - 8px)';
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+
+`;
 const SHeader = styled(Layout.Header)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: #fff;
   height: 64px;
@@ -40,16 +55,34 @@ const SHeader = styled(Layout.Header)`
 `;
 
 const SLogo = styled(LogoIcon)``;
+const HeaderContent = styled(Flex)`
+  width: 100%;
+`;
 
-const SLayout = styled(Layout)`
-  overflow: hidden;
-  width: 'calc(50% - 8px)';
-  max-width: 'calc(50% - 8px)';
-  min-height: 100dvh;
+const SFooter = styled(Layout.Footer)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  height: 64px;
+  background-color: #4096ff;
+  position: fixed;
+  padding: 10px;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
 `;
 
 const SContent = styled(Layout.Content)`
   text-align: center;
   min-height: 120px;
   padding: 74px 20px 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  
+  [data-footer=true] & {
+    padding-bottom: 74px;
+  }
 `;

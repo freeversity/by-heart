@@ -10,7 +10,8 @@ export const WordDef: FC<{
   def: WordDefinition;
   lang: string;
   className?: string;
-}> = ({ def, lang, className }) => {
+  detailed?: boolean;
+}> = ({ def, lang, className, detailed }) => {
   const [audio] = def.audios ?? [];
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -38,8 +39,8 @@ export const WordDef: FC<{
               {audio ? '🔊' : '🤖'}
             </VoiceBtn>
             {audio && (
-              <audio ref={audioRef}>
-                <source src={audio?.url} />
+              <audio ref={audioRef} key={audio.url}>
+                <source src={audio.url} />
               </audio>
             )}
           </DefHeading>
@@ -55,7 +56,7 @@ export const WordDef: FC<{
         <div>
           {def.types.map((type, index, types) => (
             <div key={type.type}>
-              <SWordTypeInfo type={type} />
+              <SWordTypeInfo detailed={detailed} type={type} />
               {index < types.length - 1 && <Divider />}
             </div>
           ))}
