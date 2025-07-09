@@ -42,7 +42,7 @@ export const FlashCard: FC<{
         )}
       </DefHeading>
       <IpasList component="ul" justify="center">
-        {defPayload.ipas.map((ipa) => (
+        {defPayload.ipas?.map((ipa) => (
           <IpaItem key={ipa}>{ipa}</IpaItem>
         ))}
       </IpasList>

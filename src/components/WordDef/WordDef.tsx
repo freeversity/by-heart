@@ -45,7 +45,7 @@ export const WordDef: FC<{
             )}
           </DefHeading>
           <IpasList component="ul" justify="center">
-            {def.ipas.map((ipa) => (
+            {def.ipas?.map((ipa) => (
               <IpaItem key={ipa}>{ipa}</IpaItem>
             ))}
           </IpasList>
