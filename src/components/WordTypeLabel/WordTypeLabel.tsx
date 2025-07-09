@@ -14,11 +14,13 @@ export const WordTypeLabel: FC<{
       {('noun' === type.type ||
         'pronoun' === type.type ||
         'adj' === type.type) &&
-        type.forms.map(({ g, n }) => `${g}, ${n}`).join('/')}
+        type.forms.map(({ g, n }) => `${g}/${n}`).join(', ')}
       {'verb' === type.type &&
         type.forms
-          .map(({ mod, tense }) => `${mod}${tense ? `, ${tense}` : ''}`)
-          .join('/')}{' '}
+          .map(({ m, t, p, n }) =>
+            [p, n, t, m].filter((item) => !!item).join('/'),
+          )
+          .join(', ')}{' '}
       {!!type.initial?.length && (
         <>
           of <strong>{type.initial}</strong>

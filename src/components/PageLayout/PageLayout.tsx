@@ -21,7 +21,7 @@ export const PageLayout: FC<{
             <SLogo />
           </Link>
           {header}
-          {subj && <DefSearch subj={subj} />}
+          {subj && <Search subj={subj} />}
         </HeaderContent>
       </SHeader>
       <SContent>{children}</SContent>
@@ -37,8 +37,14 @@ const SLayout = styled(Layout)`
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-
 `;
+
+const Search = styled(DefSearch)`
+  @media (max-width: 800px) {
+    max-width: 40%;
+  }
+`;
+
 const SHeader = styled(Layout.Header)`
   display: flex;
   align-items: center;
@@ -46,12 +52,16 @@ const SHeader = styled(Layout.Header)`
   text-align: center;
   color: #fff;
   height: 64px;
-  padding-inline: 48px;
   line-height: 64px;
   background-color: #4096ff;
   position: fixed;
   width: 100%;
   z-index: 1000;
+  padding: 0 40px;
+  
+  @media (max-width: 800px) {
+    padding:0  10px;
+  }
 `;
 
 const SLogo = styled(LogoIcon)``;

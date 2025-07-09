@@ -9,6 +9,7 @@ import { DefSearchResults } from '../DefSearchResults/DefSearchResults';
 
 export const DefSearch: FC<{ className?: string; subj: string }> = ({
   subj,
+  className,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isOpen, setOpen] = useState(false);
@@ -47,7 +48,7 @@ export const DefSearch: FC<{ className?: string; subj: string }> = ({
   }, [isOpen]);
 
   return (
-    <div ref={wrapperRef}>
+    <div ref={wrapperRef} className={className}>
       <Popover
         open={isOpen && !!query}
         arrow={false}
@@ -86,4 +87,5 @@ const ResultsWrapper = styled.div`
 
 const SearchInput = styled(Input)`
     width: 275px;
+    max-width: 100%;
 `;

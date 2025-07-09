@@ -65,8 +65,10 @@ export interface WordDefinition {
         type: 'verb';
         initial: string | string[] | null;
         forms: Array<{
-          mod: string;
-          tense: string;
+          m: string;
+          t: string;
+          p: string;
+          n: string;
           aux: string[];
           pronom: boolean;
           impers: boolean;

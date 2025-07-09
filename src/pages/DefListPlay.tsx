@@ -1,8 +1,13 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
+import {
+  CloseCircleFilled,
+  CloseOutlined,
+  InfoCircleOutlined,
+} from '@ant-design/icons';
 import { styled } from '@linaria/react';
 import { Button, Card, Divider, Drawer, Flex } from 'antd';
+import Dexie from 'dexie';
 import { useAtom } from 'jotai';
-import { type FC, Suspense, useEffect, useRef, useState } from 'react';
+import { type FC, Suspense, useEffect, useState } from 'react';
 import { FlashCard } from '../components/FlashCard';
 import { FlippedCard } from '../components/FlippedCard/FlippedCard';
 import { PageLayout } from '../components/PageLayout';
@@ -33,24 +38,34 @@ export const DefListPlay: FC = () => {
         setShowFull(false);
 
         if (def && status) {
-          await db.progress.add({
-            subj,
-            def,
-            status: status,
-            timestamp: Date.now(),
-            mode: mode,
-          });
+          await Promise.all([
+            db.progress.add({
+              def: '',
+              subj,
+              term: def,
+              status: status,
+              timestamp: Date.now(),
+              mode: mode,
+            }),
+            db.statuses.put({
+              def: '',
+              subj,
+              term: def,
+              status: status,
+              timestamp: Date.now(),
+              mode: mode,
+            }),
+          ]);
         }
 
         const [allIntroduced, staledMastered, staledAwared, staledUnknown] =
           await Promise.all([
-            db.progress
-              .where('subj')
-              .equals(subj)
+            db.statuses
+              .where({ subj, mode })
               .and((item) => item.mode === mode)
               .toArray(),
 
-            db.progress
+            db.statuses
               .where('timestamp')
               .below(Date.now() - 1000 * 60 * 60 * 24 * 7)
               .and(
@@ -60,7 +75,7 @@ export const DefListPlay: FC = () => {
                   item.status === 'mastered',
               )
               .toArray(),
-            db.progress
+            db.statuses
               .where('timestamp')
               .below(Date.now() - 1000 * 60 * 60 * 5)
               .and(
@@ -70,7 +85,7 @@ export const DefListPlay: FC = () => {
                   item.status === 'awared',
               )
               .toArray(),
-            db.progress
+            db.statuses
               .where('timestamp')
               .below(Date.now() - 1000 * 20)
               .and(
@@ -89,17 +104,17 @@ export const DefListPlay: FC = () => {
         if (random < 5 && staledMastered.length) {
           const randomIndex = Math.floor(Math.random() * staledMastered.length);
 
-          nextDef = staledMastered[randomIndex]?.def;
+          nextDef = staledMastered[randomIndex]?.term;
         } else if (random < 15 && staledAwared.length) {
           const randomIndex = Math.floor(Math.random() * staledAwared.length);
 
-          nextDef = staledAwared[randomIndex]?.def;
+          nextDef = staledAwared[randomIndex]?.term;
         } else if (random < 50 && staledUnknown.length) {
           const randomIndex = Math.floor(Math.random() * staledUnknown.length);
 
-          nextDef = staledUnknown[randomIndex]?.def;
+          nextDef = staledUnknown[randomIndex]?.term;
         } else {
-          const introducedSet = new Set(allIntroduced.map(({ def }) => def));
+          const introducedSet = new Set(allIntroduced.map(({ term }) => term));
 
           nextDef = list.find((def) => !introducedSet.has(def));
         }
@@ -200,12 +215,20 @@ export const DefListPlay: FC = () => {
           size="large"
           placement="bottom"
           open={showFull}
-          onClose={() => {
-            setShowFull(false);
-          }}
+          closable={false}
         >
           <Suspense>
             <FullInfoCard def={def} subj={subj} />
+            <CloseDrawerButton
+              onClick={() => {
+                setShowFull(false);
+              }}
+              variant="solid"
+              size="large"
+              shape="circle"
+              color="primary"
+              icon={<CloseOutlined />}
+            />
           </Suspense>
         </Drawer>
       )}
@@ -237,5 +260,12 @@ const FlippedCardContent = styled(FlippedCard)`
 
 const FullInfoCard = styled(FlippedCard)`
     width: 100%;
+    margin-bottom: 50px;
+`;
 
+const CloseDrawerButton = styled(Button)`
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
 `;

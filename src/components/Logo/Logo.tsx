@@ -28,6 +28,7 @@ const logoCx = css`
     text-transform: lowercase;
     line-height: 1;
     vertical-align: middle;
+    white-space: nowrap;
 `;
 
 const SLabel = styled.span`
