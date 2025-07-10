@@ -13,3 +13,5 @@ export const UNKNOWN_TIMEOUT_MS = 1000 * 60 * 5;
 
 // 5 min
 export const REVERSE_TERM_TIMEOUT_MS = 1000 * 60 * 20;
+
+export const NEW_WORD_DRAW_SIZE = 100;

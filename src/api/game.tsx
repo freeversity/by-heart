@@ -3,6 +3,7 @@ import {
   AWARED_TIMEOUT_MS,
   MASTERED_PROB,
   MASTERED_TIMEOUT_MS,
+  NEW_WORD_DRAW_SIZE,
   REVERSE_TERM_TIMEOUT_MS,
   UNKNOWN_PROB,
   UNKNOWN_TIMEOUT_MS,
@@ -105,7 +106,13 @@ export async function getNextForward({
   } else {
     const introducedSet = new Set(allIntroduced.map(({ term }) => term));
 
-    nextDef = list.find((def) => !introducedSet.has(def));
+    const listToChoose = list
+      .filter((def) => !introducedSet.has(def))
+      .slice(0, NEW_WORD_DRAW_SIZE);
+
+    const randomIndex = Math.floor(Math.random() * listToChoose.length);
+
+    nextDef = listToChoose[randomIndex];
   }
 
   return nextDef;
@@ -259,9 +266,13 @@ export async function getNextReverse({
     const excluded = new Set();
     const exhaustedSet = new Set(exhaustedDefs.map(({ term }) => term));
 
-    const initTerm = list.find(
-      (def) => !exhaustedSet.has(def) && !excluded.has(def),
-    );
+    const listToChoose = list
+      .filter((def) => !exhaustedSet.has(def) && !excluded.has(def))
+      .slice(0, NEW_WORD_DRAW_SIZE);
+
+    const randomIndex = Math.floor(Math.random() * listToChoose.length);
+
+    const initTerm = listToChoose[randomIndex];
 
     if (!initTerm) return;
 
@@ -296,9 +307,13 @@ export async function getNextReverse({
         excluded.add(nextTerm);
 
         if (!availableLemmas.length) {
-          const term = list.find(
-            (def) => !exhaustedSet.has(def) && !excluded.has(def),
-          );
+          const listToChoose = list
+            .filter((def) => !exhaustedSet.has(def) && !excluded.has(def))
+            .slice(0, NEW_WORD_DRAW_SIZE);
+
+          const randomIndex = Math.floor(Math.random() * listToChoose.length);
+
+          const term = listToChoose[randomIndex];
 
           if (!term) return;
 
@@ -311,9 +326,13 @@ export async function getNextReverse({
       if (!availableTranslations.length) {
         const randomIndex = Math.floor(Math.random() * availableLemmas.length);
 
-        const term =
-          availableLemmas[randomIndex] ??
-          list.find((def) => !exhaustedSet.has(def) && !excluded.has(def));
+        const listToChoose = list
+          .filter((def) => !exhaustedSet.has(def) && !excluded.has(def))
+          .slice(0, NEW_WORD_DRAW_SIZE);
+
+        const randomListIndex = Math.floor(Math.random() * listToChoose.length);
+
+        const term = availableLemmas[randomIndex] ?? list[randomListIndex];
 
         if (!term) return;
 
@@ -329,10 +348,13 @@ export async function getNextReverse({
       const def = availableTranslations[randomIndex];
 
       if (!def) {
-        const term = list.find(
-          (def) => !exhaustedSet.has(def) && !excluded.has(def),
-        );
+        const listToChoose = list
+          .filter((def) => !exhaustedSet.has(def) && !excluded.has(def))
+          .slice(0, NEW_WORD_DRAW_SIZE);
 
+        const randomIndex = Math.floor(Math.random() * listToChoose.length);
+
+        const term = listToChoose[randomIndex];
         if (!term) return;
 
         nextTerm = term;

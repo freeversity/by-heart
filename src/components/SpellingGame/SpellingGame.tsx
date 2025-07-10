@@ -149,13 +149,22 @@ export const SpellingGame: FC = () => {
               <FlashCardContent hidden def={pair.term} subj={subj} />
             </Suspense>
             <Divider />
-            <SpellingInput
-              rows={2}
-              value={guess}
-              onChange={(e) => {
-                setGuess(e.target.value);
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+
+                setFlipped(true);
               }}
-            />
+            >
+              <SpellingInput
+                placeholder="Spell the word"
+                value={guess}
+                onChange={(e) => {
+                  setGuess(e.target.value);
+                }}
+              />
+              <SubmitInput type="submit" />
+            </Form>
           </DefCard>
         )}
         {isFlipped && pair && (
@@ -247,7 +256,16 @@ const STimer = styled(Timer)`
     margin: 5px 0;
 `;
 
-const SpellingInput = styled(Input.TextArea)`
-    resize: none !important;
-    margin-bottom: 20px;
+const Form = styled.form`
+  height: auto;
+`;
+
+const SpellingInput = styled(Input)`
+  margin: 0;
+`;
+
+const SubmitInput = styled(Input)`
+  visibility: hidden;
+  height: 1px;
+  padding: 0;
 `;
