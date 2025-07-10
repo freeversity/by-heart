@@ -34,7 +34,7 @@ export const SpellingGame: FC = () => {
   const [list] = useAtom(currentListAtom({ subj, id: listId }));
 
   const status =
-    guess.toLocaleLowerCase() === pair?.term.toLocaleLowerCase()
+    guess.toLocaleLowerCase().trim() === pair?.term.toLocaleLowerCase()
       ? 'mastered'
       : normalizeString(guess) === normalizeString(pair?.term ?? '')
         ? 'awared'
@@ -73,7 +73,61 @@ export const SpellingGame: FC = () => {
   }, [onNext]);
 
   return (
-    <PageLayout header={listId}>
+    <PageLayout
+      header={listId}
+      footer={
+        <Flex gap="20px" justify="center">
+          {isFlipped && (
+            <>
+              <Button
+                icon={<InfoCircleOutlined />}
+                size="large"
+                color="default"
+                onClick={() => {
+                  setShowFull(true);
+                }}
+              >
+                Full info
+              </Button>
+              <Button
+                variant="solid"
+                size="large"
+                color="default"
+                onClick={() => {
+                  onNext(status);
+                }}
+              >
+                Next
+              </Button>
+            </>
+          )}
+          {!isFlipped && (
+            <>
+              <Button
+                icon="🙈"
+                onClick={() => {
+                  setFlipped(true);
+                }}
+                loading={isLoadingNext}
+              >
+                Flip!
+              </Button>
+              <Button
+                icon="🤓"
+                color="primary"
+                variant="solid"
+                onClick={() => {
+                  setFlipped(true);
+                }}
+                loading={isLoadingNext}
+              >
+                Submit
+              </Button>
+            </>
+          )}
+        </Flex>
+      }
+    >
       <SubjShortStats subj={subj} list={list} mode="spelling" />
       <STimer
         onPause={(start, end) => {
@@ -102,28 +156,6 @@ export const SpellingGame: FC = () => {
                 setGuess(e.target.value);
               }}
             />
-            <Flex gap="20px" justify="center">
-              <Button
-                icon="🙈"
-                onClick={() => {
-                  setFlipped(true);
-                }}
-                loading={isLoadingNext}
-              >
-                Flip!
-              </Button>
-              <Button
-                icon="🤓"
-                color="primary"
-                variant="solid"
-                onClick={() => {
-                  setFlipped(true);
-                }}
-                loading={isLoadingNext}
-              >
-                Submit
-              </Button>
-            </Flex>
           </DefCard>
         )}
         {isFlipped && pair && (
@@ -138,28 +170,6 @@ export const SpellingGame: FC = () => {
                 subj={subj}
               />
             </FlippedCardWrapper>
-            <Flex gap="10px">
-              <Button
-                variant="solid"
-                size="large"
-                color="default"
-                onClick={() => {
-                  onNext(status);
-                }}
-              >
-                Next
-              </Button>
-              <Button
-                icon={<InfoCircleOutlined />}
-                size="large"
-                color="default"
-                onClick={() => {
-                  setShowFull(true);
-                }}
-              >
-                Full info
-              </Button>
-            </Flex>
           </Suspense>
         )}
       </Content>
