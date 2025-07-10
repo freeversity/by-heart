@@ -12,7 +12,7 @@ export const WikiHtml: FC<{ html?: string; className?: string }> = ({
       e.preventDefault();
 
       window.open(
-        `https://en.wiktionary.com${e.target.getAttribute('href')}`,
+        `https://en.wiktionary.com/${e.target.getAttribute('href')}`,
         '_brank',
       );
     }
@@ -39,6 +39,7 @@ export const WikiHtml: FC<{ html?: string; className?: string }> = ({
             },
             allowedAttributes: {
               td: ['rowspan', 'colspan'],
+              a: ['href'],
               th: ['rowspan', 'colspan'],
             },
           }),

@@ -1,8 +1,17 @@
 import { CloseOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { styled } from '@linaria/react';
-import { Button, Card, Divider, Drawer, Flex, Input, Typography } from 'antd';
+import {
+  Button,
+  Card,
+  Divider,
+  Drawer,
+  Flex,
+  Input,
+  type InputRef,
+  Typography,
+} from 'antd';
 import { useAtom } from 'jotai';
-import { type FC, Suspense, useEffect, useState } from 'react';
+import { type FC, Suspense, useEffect, useRef, useState } from 'react';
 import { getNextReverse } from '../../api/game';
 import { Colors } from '../../consts/colors';
 import { db } from '../../db';
@@ -33,6 +42,9 @@ export const SpellingGame: FC = () => {
   const [showFull, setShowFull] = useState(false);
   const [list] = useAtom(currentListAtom({ subj, id: listId }));
 
+  const nextBtnRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<InputRef>(null);
+
   const status =
     guess.toLocaleLowerCase().trim() === pair?.term.toLocaleLowerCase()
       ? 'mastered'
@@ -59,6 +71,17 @@ export const SpellingGame: FC = () => {
 
         if (nextTerm) {
           setPair(nextTerm);
+
+          requestAnimationFrame(() => {
+            inputRef.current?.focus();
+
+            setTimeout(() => {
+              inputRef.current?.input?.scrollIntoView({
+                behavior: 'instant',
+                block: 'end',
+              });
+            }, 500);
+          });
         }
       } catch (err) {
         console.error(err);
@@ -90,6 +113,7 @@ export const SpellingGame: FC = () => {
                 Full info
               </Button>
               <Button
+                ref={nextBtnRef}
                 variant="solid"
                 size="large"
                 color="default"
@@ -118,6 +142,10 @@ export const SpellingGame: FC = () => {
                 variant="solid"
                 onClick={() => {
                   setFlipped(true);
+
+                  requestAnimationFrame(() => {
+                    nextBtnRef.current?.focus();
+                  });
                 }}
                 loading={isLoadingNext}
               >
@@ -154,10 +182,19 @@ export const SpellingGame: FC = () => {
                 e.preventDefault();
 
                 setFlipped(true);
+
+                requestAnimationFrame(() => {
+                  nextBtnRef.current?.focus();
+                });
               }}
             >
               <SpellingInput
+                ref={inputRef}
                 placeholder="Spell the word"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 value={guess}
                 onChange={(e) => {
                   setGuess(e.target.value);
