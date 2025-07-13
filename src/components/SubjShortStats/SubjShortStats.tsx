@@ -1,3 +1,8 @@
+import {
+  EditOutlined,
+  PlayCircleFilled,
+  ReloadOutlined,
+} from '@ant-design/icons';
 import { Tag } from 'antd';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { type FC, useMemo } from 'react';
@@ -47,8 +52,17 @@ export const SubjShortStats: FC<{
     [statuses],
   );
 
+  let modeIcon = <PlayCircleFilled />;
+
+  if (mode === 'reverse') {
+    modeIcon = <ReloadOutlined />;
+  } else if (mode === 'spelling') {
+    modeIcon = <EditOutlined />;
+  }
+
   return (
     <div className={className}>
+      <Tag color={Colors.neutral[7]}>{modeIcon}</Tag>
       <Tag color={Colors.mastered} icon={'🤓'}>
         {' '}
         {stats[Status.Mastered] ?? '...'}

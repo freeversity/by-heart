@@ -10,15 +10,17 @@ export const TermStatus: FC<{
   subj: string;
   mode: string;
   term: string;
+  type: string;
   def?: string;
   className?: string;
-}> = ({ subj, mode, term, def = '', className }) => {
+}> = ({ subj, mode, term, type, def = '', className }) => {
   const status = useLiveQuery(() =>
     db.statuses.get({
       subj,
       mode,
       term,
       def,
+      type,
     }),
   );
 
@@ -45,5 +47,6 @@ export const TermStatus: FC<{
 };
 
 const STag = styled(Tag)`
+    list-style: none;
     margin: 0
 `;

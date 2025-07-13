@@ -4,19 +4,25 @@ import { definitionAtom } from '../../state/currentDef/atoms';
 import { WordDef } from '../WordDef';
 
 export const FlippedCard: FC<{
-  def: string;
+  term: string;
   subj: string;
   className?: string;
   detailed?: boolean;
-}> = ({ def, subj, className, detailed }) => {
-  const [defPayload] = useAtom(definitionAtom({ subj, def }));
+  mode?: string;
+  type?: string;
+  def?: string;
+}> = ({ term, subj, className, detailed, mode, def, type }) => {
+  const [defPayload] = useAtom(definitionAtom({ subj, def: term }));
 
   return (
     <WordDef
-      def={defPayload}
+      defPayload={defPayload}
+      type={type}
       className={className}
       lang={subj}
       detailed={detailed}
+      mode={mode}
+      def={def}
     />
   );
 };

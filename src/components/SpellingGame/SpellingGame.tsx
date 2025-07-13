@@ -1,4 +1,9 @@
-import { CloseOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import {
+  CloseOutlined,
+  DownOutlined,
+  InfoCircleOutlined,
+  UpOutlined,
+} from '@ant-design/icons';
 import { styled } from '@linaria/react';
 import {
   Button,
@@ -27,6 +32,7 @@ import { SubjShortStats } from '../SubjShortStats';
 import { TermStatus } from '../TermStatus';
 import { TermStatusHistory } from '../TermStatusHistory';
 import { Timer } from '../Timer/Timer';
+import { TransList } from '../TransList';
 
 const mode = 'spelling';
 
@@ -34,8 +40,14 @@ export const SpellingGame: FC = () => {
   const subj = useSubj();
   const listId = useListId();
 
-  const [pair, setPair] = useState<{ term: string; def: string } | null>(null);
+  const [pair, setPair] = useState<{
+    def: string;
+    term: string;
+    lemma: string | null;
+    type: string;
+  } | null>(null);
   const [ipaHidden, setIpaHidden] = useState(true);
+  const [translationType, setTranslationType] = useState<string | null>(null);
 
   const [isLoadingNext, setLoadingNext] = useState(false);
 
@@ -49,7 +61,8 @@ export const SpellingGame: FC = () => {
   const inputRef = useRef<InputRef>(null);
 
   const status =
-    guess.toLocaleLowerCase().trim() === pair?.term.toLocaleLowerCase()
+    guess.toLocaleLowerCase().trim() === pair?.term.toLocaleLowerCase() &&
+    ipaHidden
       ? 'mastered'
       : normalizeString(guess) === normalizeString(pair?.term ?? '')
         ? 'awared'
@@ -64,6 +77,7 @@ export const SpellingGame: FC = () => {
         setShowFull(false);
         setGuess('');
         setIpaHidden(true);
+        setTranslationType(null);
 
         const nextTerm = await getNextReverse({
           list,
@@ -110,6 +124,7 @@ export const SpellingGame: FC = () => {
                 icon={<InfoCircleOutlined />}
                 size="large"
                 color="default"
+                loading={isLoadingNext}
                 onClick={() => {
                   setShowFull(true);
                 }}
@@ -121,6 +136,7 @@ export const SpellingGame: FC = () => {
                 variant="solid"
                 size="large"
                 color="default"
+                loading={isLoadingNext}
                 onClick={() => {
                   onNext(status);
                 }}
@@ -173,26 +189,46 @@ export const SpellingGame: FC = () => {
         }}
       />
       <Content justify="center" align="center">
-        {pair && (
-          <TermStatusHistory
-            mode={mode}
-            term={pair.term}
-            def={pair.def}
-            subj={subj}
-          />
-        )}
         {!isFlipped && pair && (
           <DefCard>
-            <Typography.Title level={3}>
-              <Status mode={mode} term={pair.term} def={pair.def} subj={subj} />{' '}
-              {pair.def}
-            </Typography.Title>
+            <Flex justify="space-between" align="center" gap="10px">
+              <TermStatus
+                mode={mode}
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+                subj={subj}
+              />
+              <Typography.Text strong italic>
+                {pair.def} {pair.type && <TypeLabel>({pair.type})</TypeLabel>}
+              </Typography.Text>
+              <Button
+                shape="circle"
+                onClick={() => {
+                  setTranslationType((type) => (type ? null : pair.type));
+                }}
+              >
+                {translationType ? <DownOutlined /> : <UpOutlined />}
+              </Button>
+            </Flex>
+
+            {pair && (
+              <History
+                mode={mode}
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+                subj={subj}
+              />
+            )}
             <Divider />
+
             <Suspense>
               <FlashCardContent
                 hidden
                 mode={mode}
                 term={pair.term}
+                type={pair.type}
                 def={pair.def}
                 subj={subj}
                 ipaHidden={ipaHidden}
@@ -200,6 +236,12 @@ export const SpellingGame: FC = () => {
               />
             </Suspense>
             <Divider />
+            {translationType && (
+              <Suspense>
+                <TransList term={pair.term} subj={subj} type={pair.type} />
+                <Divider />
+              </Suspense>
+            )}
             <Form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -228,18 +270,34 @@ export const SpellingGame: FC = () => {
           </DefCard>
         )}
         {isFlipped && pair && (
-          <Suspense fallback="Loading...">
-            <Typography.Title style={{ color: Colors[status] }} level={3}>
-              {guess}
-            </Typography.Title>
-            <FlippedCardWrapper>
+          <FlippedCardWrapper>
+            <Typography.Text
+              style={{ color: Colors[status], fontSize: '1.5em' }}
+              strong
+            >
+              {guess || '?'}
+            </Typography.Text>
+            {pair && (
+              <History
+                subj={subj}
+                mode={mode}
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+              />
+            )}
+            <Divider />
+            <Suspense fallback="Loading...">
               <FlippedCardContent
                 detailed={false}
-                def={pair.term}
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+                mode={mode}
                 subj={subj}
               />
-            </FlippedCardWrapper>
-          </Suspense>
+            </Suspense>
+          </FlippedCardWrapper>
         )}
       </Content>
       {pair && (
@@ -254,7 +312,12 @@ export const SpellingGame: FC = () => {
         >
           <ErrorBoundary>
             <Suspense>
-              <FullInfoCard def={pair.term} subj={subj} />
+              <FullInfoCard
+                subj={subj}
+                term={pair.term}
+                def={pair.def}
+                mode={mode}
+              />
             </Suspense>
           </ErrorBoundary>
           <CloseDrawerButton
@@ -280,21 +343,18 @@ const Content = styled(Flex)`
     width: 100%;
     height: 100%;
     flex-grow: 1;
+    padding-bottom: 40px;
 `;
 
 const DefCard = styled(Card)`
     width: fit-content;
     min-width: 300px;
-    margin-bottom: 20%;
-`;
-
-const Status = styled(TermStatus)`
-  vertical-align: middle;
 `;
 
 const FlashCardContent = styled(FlashCard)`
     width: 300px;
     margin: 0 auto;
+    margin-bottom: 20px;
 `;
 
 const FlippedCardWrapper = styled(Card)`
@@ -333,4 +393,15 @@ const SubmitInput = styled(Input)`
   visibility: hidden;
   height: 1px;
   padding: 0;
+`;
+
+const TypeLabel = styled(Typography.Text)`
+  white-space: nowrap;
+  color: ${Colors.neutral[5]};
+  font-weight: bold;
+  min-width: 30px;
+`;
+
+const History = styled(TermStatusHistory)`
+    width: 100%;
 `;

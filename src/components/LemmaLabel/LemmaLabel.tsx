@@ -10,7 +10,10 @@ export const LemmaLabel: FC<{
   className?: string;
   lemma: string;
   subj: string;
-}> = ({ className, lemma, subj }) => {
+  mode?: string;
+  def?: string;
+  type: string;
+}> = ({ className, lemma, subj, mode, def, type }) => {
   const [isOpen, setOpen] = useState(false);
   return (
     <>
@@ -48,7 +51,13 @@ export const LemmaLabel: FC<{
       >
         <ErrorBoundary>
           <Suspense>
-            <FlippedCard def={lemma} subj={subj} />
+            <FlippedCard
+              type={type}
+              term={lemma}
+              subj={subj}
+              mode={mode}
+              def={def}
+            />
           </Suspense>
         </ErrorBoundary>
       </Modal>

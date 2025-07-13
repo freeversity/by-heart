@@ -1,9 +1,15 @@
-import { CloseOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import {
+  CloseOutlined,
+  DownOutlined,
+  InfoCircleOutlined,
+  UpOutlined,
+} from '@ant-design/icons';
 import { styled } from '@linaria/react';
 import { Button, Card, Divider, Drawer, Flex, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, Suspense, useEffect, useState } from 'react';
 import { getNextReverse } from '../../api/game';
+import { Colors } from '../../consts/colors';
 import { db } from '../../db';
 import { useRefCallback } from '../../hooks/useRefCallback';
 import { useListId, useSubj } from '../../hooks/useSubj';
@@ -15,6 +21,7 @@ import { SubjShortStats } from '../SubjShortStats';
 import { TermStatus } from '../TermStatus/TermStatus';
 import { TermStatusHistory } from '../TermStatusHistory';
 import { Timer } from '../Timer/Timer';
+import { TransList } from '../TransList';
 
 const mode = 'reverse';
 
@@ -22,9 +29,15 @@ export const ReverseGame: FC = () => {
   const subj = useSubj();
   const listId = useListId();
 
-  const [pair, setPair] = useState<{ term: string; def: string } | null>(null);
+  const [pair, setPair] = useState<{
+    def: string;
+    term: string;
+    lemma: string | null;
+    type: string;
+  } | null>(null);
 
   const [isLoadingNext, setLoadingNext] = useState(false);
+  const [translationType, setTranslationType] = useState<string | null>(null);
 
   const [isFlipped, setFlipped] = useState(false);
   const [showFull, setShowFull] = useState(false);
@@ -37,6 +50,7 @@ export const ReverseGame: FC = () => {
         setLoadingNext(true);
         setFlipped(false);
         setShowFull(false);
+        setTranslationType(null);
 
         const nextTerm = await getNextReverse({
           list,
@@ -102,26 +116,45 @@ export const ReverseGame: FC = () => {
         }}
       />
       <Content justify="center" align="center">
-        {pair && (
-          <TermStatusHistory
-            subj={subj}
-            mode={mode}
-            term={pair.term}
-            def={pair.def}
-          />
-        )}
         {!isFlipped && pair && (
           <DefCard>
-            <Typography.Text strong italic>
+            <Flex justify="space-between" align="center" gap="10px">
               <TermStatus
                 subj={subj}
                 mode={mode}
+                type={pair.type}
                 term={pair.term}
                 def={pair.def}
-              />{' '}
-              {pair.def}
-            </Typography.Text>
+              />
+              <Typography.Text strong italic>
+                {pair.def} {pair.type && <TypeLabel>({pair.type})</TypeLabel>}
+              </Typography.Text>
+              <Button
+                shape="circle"
+                onClick={() => {
+                  setTranslationType((type) => (type ? null : pair.type));
+                }}
+              >
+                {translationType ? <DownOutlined /> : <UpOutlined />}
+              </Button>
+            </Flex>
+            {pair && (
+              <History
+                subj={subj}
+                mode={mode}
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+              />
+            )}
             <Divider />
+
+            {translationType && (
+              <Suspense>
+                <TransList term={pair.term} subj={subj} type={pair.type} />
+                <Divider />
+              </Suspense>
+            )}
             <Button
               variant="solid"
               size="large"
@@ -138,9 +171,21 @@ export const ReverseGame: FC = () => {
         {isFlipped && pair && (
           <Suspense fallback="Loading...">
             <FlippedCardWrapper>
+              {pair && (
+                <History
+                  subj={subj}
+                  mode={mode}
+                  type={pair.type}
+                  term={pair.term}
+                  def={pair.def}
+                />
+              )}
               <FlippedCardContent
                 detailed={false}
-                def={pair.term}
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+                mode={mode}
                 subj={subj}
               />
             </FlippedCardWrapper>
@@ -181,7 +226,13 @@ export const ReverseGame: FC = () => {
         >
           <ErrorBoundary>
             <Suspense>
-              <FullInfoCard def={pair.term} subj={subj} />
+              <FullInfoCard
+                term={pair.term}
+                type={pair.type}
+                def={pair.def}
+                mode={mode}
+                subj={subj}
+              />
             </Suspense>
           </ErrorBoundary>
           <CloseDrawerButton
@@ -212,7 +263,6 @@ const Content = styled(Flex)`
 const DefCard = styled(Card)`
     width: fit-content;
     min-width: 300px;
-    margin-bottom: 20%;
 `;
 
 const FlippedCardWrapper = styled(Card)`
@@ -237,4 +287,12 @@ const CloseDrawerButton = styled(Button)`
 
 const STimer = styled(Timer)`
     margin: 5px 0;
+`;
+
+const TypeLabel = styled(Typography.Text)`
+  color: ${Colors.neutral[5]};
+`;
+
+const History = styled(TermStatusHistory)`
+    margin-bottom: 10px;
 `;

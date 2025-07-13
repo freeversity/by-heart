@@ -1,11 +1,8 @@
 import {
-  AWARED_PROB_EVEN,
   AWARED_TIMEOUT_MS,
-  MASTERED_PROB_EVEN,
   MASTERED_TIMEOUT_MS,
   NEW_WORD_DRAW_SIZE,
   REVERSE_TERM_TIMEOUT_MS,
-  UNKNOWN_PROB_EVEN,
   UNKNOWN_TIMEOUT_MS,
 } from '../consts/discovery';
 import { Status, db } from '../db/db';
@@ -17,15 +14,44 @@ export async function getNextForward({
   subj,
   term,
   status,
+  type,
+  lemma,
 }: {
   list: string[];
   subj: string;
   term?: string | null;
+  type?: string;
+  lemma?: string | null;
   status?: Status;
-}) {
+}): Promise<{
+  term: string;
+  lemma: string | null;
+  type: string;
+}> {
   const listSet = new Set(list);
 
-  if (term && status) {
+  let exhausted = false;
+
+  if (term) {
+    const [fullDef, termStatuses] = await Promise.all([
+      getDef(subj, term),
+      db.statuses
+        .where({
+          subj,
+          term,
+          mode: 'forward',
+        })
+        .toArray(),
+    ]);
+
+    const types = fullDef.types.map(({ type }) => type) ?? [];
+
+    exhausted = types.every((type) =>
+      termStatuses.some((status) => status.type === type),
+    );
+  }
+
+  if (term && status && type) {
     await Promise.all([
       db.progress.add({
         def: '',
@@ -33,6 +59,8 @@ export async function getNextForward({
         term: term,
         status: status,
         timestamp: Date.now(),
+        type,
+        lemma: lemma ?? '',
         mode: 'forward',
       }),
       db.statuses.put({
@@ -41,16 +69,37 @@ export async function getNextForward({
         term: term,
         status: status,
         timestamp: Date.now(),
+        type,
+        lemma: lemma ?? '',
         mode: 'forward',
       }),
+      ...(exhausted
+        ? [
+            db.statuses.put({
+              def: '',
+              subj,
+              term: term,
+              status: 'excluded',
+              timestamp: Date.now(),
+              type: '',
+              lemma: '',
+              mode: 'forward',
+            }),
+          ]
+        : []),
     ]);
   }
 
-  const [allIntroduced, staledMastered, staledAwared, staledUnknown] =
+  const [exhaustedDefs, staledMastered, staledAwared, staledUnknown] =
     await Promise.all([
       db.statuses
         .where({ subj, mode: 'forward' })
-        .and((item) => item.mode === 'forward' && listSet.has(item.term))
+        .and(
+          (item) =>
+            listSet.has(item.term) &&
+            (!item.type ||
+              item.timestamp > Date.now() - REVERSE_TERM_TIMEOUT_MS),
+        )
         .toArray(),
 
       db.statuses
@@ -61,6 +110,7 @@ export async function getNextForward({
             item.mode === 'forward' &&
             item.subj === subj &&
             item.status === 'mastered' &&
+            !!item.type &&
             listSet.has(item.term),
         )
         .toArray(),
@@ -72,6 +122,7 @@ export async function getNextForward({
             item.mode === 'forward' &&
             item.subj === subj &&
             item.status === 'awared' &&
+            !!item.type &&
             listSet.has(item.term),
         )
         .toArray(),
@@ -83,12 +134,13 @@ export async function getNextForward({
             item.mode === 'forward' &&
             item.subj === subj &&
             item.status === 'unknown' &&
+            !!item.type &&
             listSet.has(item.term),
         )
         .toArray(),
     ]);
 
-  const introducedSet = new Set(allIntroduced.map(({ term }) => term));
+  const introducedSet = new Set(exhaustedDefs.map(({ term }) => term));
 
   const newTerms = list
     .filter((def) => !introducedSet.has(def))
@@ -105,22 +157,139 @@ export async function getNextForward({
     case Status.Mastered: {
       const randomIndex = Math.floor(Math.random() * staledMastered.length);
 
-      return staledMastered[randomIndex]?.term;
+      const term = staledMastered[randomIndex];
+
+      if (!term)
+        throw new Error(
+          `Something went wrong. Random mastered term not found (${randomIndex}/${staledMastered.length}).`,
+        );
+
+      return { term: term.term, lemma: term.lemma, type: term.type };
     }
     case Status.Awared: {
       const randomIndex = Math.floor(Math.random() * staledAwared.length);
 
-      return staledAwared[randomIndex]?.term;
+      const term = staledMastered[randomIndex];
+
+      if (!term)
+        throw new Error(
+          `Something went wrong. Random awared term not found (${randomIndex}/${staledAwared.length}).`,
+        );
+
+      return { term: term.term, lemma: term.lemma, type: term.type };
     }
     case Status.Unknown: {
       const randomIndex = Math.floor(Math.random() * staledUnknown.length);
 
-      return staledUnknown[randomIndex]?.term;
+      const term = staledMastered[randomIndex];
+
+      if (!term)
+        throw new Error(
+          `Something went wrong. Random unknown term not found (${randomIndex}/${staledUnknown.length}).`,
+        );
+
+      return { term: term.term, lemma: term.lemma, type: term.type };
     }
     default: {
-      const randomIndex = Math.floor(Math.random() * newTerms.length);
+      {
+        const randomIndex = Math.floor(Math.random() * newTerms.length);
 
-      return newTerms[randomIndex];
+        const initTerm = newTerms[randomIndex];
+
+        if (!initTerm)
+          throw new Error(
+            `Something went wrong. Random new term not found (${randomIndex}/${newTerms.length}).`,
+          );
+
+        let nextTerm = initTerm;
+
+        let nextResult:
+          | {
+              term: string;
+              lemma: string | null;
+              type: string;
+            }
+          | undefined;
+
+        while (!nextResult) {
+          const [statuses, definition] = await Promise.all([
+            db.statuses
+              .where({ subj, mode: 'forward', term: nextTerm })
+              .toArray(),
+            getDef(subj, nextTerm),
+          ]);
+
+          const introducedTypes = new Set(statuses.map(({ type }) => type));
+
+          const availableTypes = definition.types
+            .flatMap(({ type, initial }) => ({ type: type, lemma: initial }))
+            .filter(({ type }) => !introducedTypes.has(type));
+
+          if (!definition.types.length) {
+            nextResult = { type: '', term: nextTerm, lemma: null };
+            break;
+          }
+          if (!availableTypes.length) {
+            await db.statuses.put({
+              def: '',
+              subj,
+              term: nextTerm,
+              status: 'excluded',
+              timestamp: Date.now(),
+              type: '',
+              lemma: '',
+              mode: 'forward',
+            });
+            introducedSet.add(nextTerm);
+
+            const listToChoose = list
+              .filter((def) => !introducedSet.has(def))
+              .slice(0, NEW_WORD_DRAW_SIZE);
+
+            const randomListIndex = Math.floor(
+              Math.random() * listToChoose.length,
+            );
+
+            const term = listToChoose[randomListIndex];
+
+            if (!term)
+              throw new Error(
+                `Something went wrong. Random new term not found (${randomListIndex}/${listToChoose.length}).`,
+              );
+
+            nextTerm = term;
+
+            continue;
+          }
+
+          const randomIndex = Math.floor(Math.random() * availableTypes.length);
+
+          const def = availableTypes[randomIndex];
+
+          if (!def) {
+            const listToChoose = list
+              .filter((def) => !introducedSet.has(def))
+              .slice(0, NEW_WORD_DRAW_SIZE);
+
+            const randomIndex = Math.floor(Math.random() * listToChoose.length);
+
+            const term = listToChoose[randomIndex];
+
+            if (!term)
+              throw new Error(
+                `Something went wrong. Random new term not found (${randomIndex}/${listToChoose.length}).`,
+              );
+
+            nextTerm = term;
+
+            continue;
+          }
+
+          nextResult = { term: nextTerm, ...def };
+        }
+
+        return nextResult;
+      }
     }
   }
 }
@@ -132,6 +301,8 @@ export async function getNextReverse({
   status,
   def,
   mode = 'reverse',
+  type,
+  lemma,
 }: {
   list: string[];
   subj: string;
@@ -139,7 +310,14 @@ export async function getNextReverse({
   def?: string | null;
   status?: Status;
   mode?: string;
-}) {
+  type?: string | null;
+  lemma?: string | null;
+}): Promise<{
+  def: string;
+  term: string;
+  lemma: string | null;
+  type: string;
+}> {
   const listSet = new Set(list);
 
   let exhausted = false;
@@ -172,6 +350,8 @@ export async function getNextReverse({
         term: term,
         status: status,
         timestamp: Date.now(),
+        type: type ?? '',
+        lemma: lemma ?? '',
         mode,
       }),
       db.statuses.put({
@@ -180,6 +360,8 @@ export async function getNextReverse({
         term: term,
         status: status,
         timestamp: Date.now(),
+        type: type ?? '',
+        lemma: lemma ?? '',
         mode,
       }),
       ...(exhausted
@@ -190,6 +372,8 @@ export async function getNextReverse({
               term: term,
               status: 'excluded',
               timestamp: Date.now(),
+              type: '',
+              lemma: '',
               mode,
             }),
           ]
@@ -261,32 +445,67 @@ export async function getNextReverse({
     newCount: listToChoose.length,
   });
 
-  let nextPair: { def: string; term: string } | undefined;
+  let nextPair:
+    | { def: string; term: string; lemma: string | null; type: string }
+    | undefined;
 
   if (newTermCat === Status.Mastered) {
     const randomIndex = Math.floor(Math.random() * staledMastered.length);
 
-    const { term, def } = staledMastered[randomIndex] ?? {};
+    const nextTerm = staledMastered[randomIndex];
 
-    nextPair = term && def ? { term, def } : undefined;
+    if (!nextTerm)
+      throw new Error(
+        `Something went wrong. Random mastered term not found (${randomIndex}/${staledMastered.length}).`,
+      );
+
+    nextPair = {
+      term: nextTerm.term,
+      def: nextTerm.def,
+      lemma: nextTerm.lemma,
+      type: nextTerm.type,
+    };
   } else if (newTermCat === Status.Awared) {
     const randomIndex = Math.floor(Math.random() * staledAwared.length);
 
-    const { term, def } = staledAwared[randomIndex] ?? {};
+    const nextTerm = staledAwared[randomIndex];
 
-    nextPair = term && def ? { term, def } : undefined;
+    if (!nextTerm)
+      throw new Error(
+        `Something went wrong. Random awared term not found (${randomIndex}/${staledAwared.length}).`,
+      );
+
+    nextPair = {
+      term: nextTerm.term,
+      def: nextTerm.def,
+      lemma: nextTerm.lemma,
+      type: nextTerm.type,
+    };
   } else if (newTermCat === Status.Unknown) {
     const randomIndex = Math.floor(Math.random() * staledUnknown.length);
 
-    const { term, def } = staledUnknown[randomIndex] ?? {};
+    const nextTerm = staledUnknown[randomIndex];
 
-    nextPair = term && def ? { term, def } : undefined;
+    if (!nextTerm)
+      throw new Error(
+        `Something went wrong. Random unknown term not found (${randomIndex}/${staledUnknown.length}).`,
+      );
+
+    nextPair = {
+      term: nextTerm.term,
+      def: nextTerm.def,
+      lemma: nextTerm.lemma,
+      type: nextTerm.type,
+    };
   } else {
     const randomIndex = Math.floor(Math.random() * listToChoose.length);
 
     const initTerm = listToChoose[randomIndex];
 
-    if (!initTerm) return;
+    if (!initTerm)
+      throw new Error(
+        `Something went wrong. Random new term not found (${randomIndex}/${listToChoose.length}).`,
+      );
 
     let nextTerm = initTerm;
 
@@ -304,8 +523,11 @@ export async function getNextReverse({
         );
 
       const availableTranslations = definition.types
-        .flatMap(({ trans }) => trans ?? [])
-        .filter((trans) => !introducedDefs.has(trans));
+        .flatMap(
+          ({ trans, type, initial }) =>
+            trans.map((def) => ({ def, type: type, lemma: initial })) ?? [],
+        )
+        .filter(({ def }) => !introducedDefs.has(def));
 
       if (!availableTranslations.length) {
         await db.statuses.put({
@@ -314,6 +536,8 @@ export async function getNextReverse({
           term: nextTerm,
           status: 'excluded',
           timestamp: Date.now(),
+          type: '',
+          lemma: '',
           mode,
         });
         excluded.add(nextTerm);
@@ -327,7 +551,10 @@ export async function getNextReverse({
 
           const term = listToChoose[randomIndex];
 
-          if (!term) return;
+          if (!term)
+            throw new Error(
+              `Something went wrong. Random new term not found (${randomIndex}/${listToChoose.length}).`,
+            );
 
           nextTerm = term;
 
@@ -336,6 +563,18 @@ export async function getNextReverse({
       }
 
       if (!availableTranslations.length) {
+        await db.statuses.put({
+          def: '',
+          subj,
+          term: nextTerm,
+          status: 'excluded',
+          timestamp: Date.now(),
+          type: '',
+          lemma: '',
+          mode,
+        });
+        excluded.add(nextTerm);
+
         const randomIndex = Math.floor(Math.random() * availableLemmas.length);
 
         const listToChoose = list
@@ -344,9 +583,13 @@ export async function getNextReverse({
 
         const randomListIndex = Math.floor(Math.random() * listToChoose.length);
 
-        const term = availableLemmas[randomIndex] ?? list[randomListIndex];
+        const term =
+          availableLemmas[randomIndex] ?? listToChoose[randomListIndex];
 
-        if (!term) return;
+        if (!term)
+          throw new Error(
+            `Something went wrong. Random new term not found (${randomIndex}/${listToChoose.length}).`,
+          );
 
         nextTerm = term;
 
@@ -367,14 +610,18 @@ export async function getNextReverse({
         const randomIndex = Math.floor(Math.random() * listToChoose.length);
 
         const term = listToChoose[randomIndex];
-        if (!term) return;
+
+        if (!term)
+          throw new Error(
+            `Something went wrong. Random new term not found (${randomIndex}/${listToChoose.length}).`,
+          );
 
         nextTerm = term;
 
         continue;
       }
 
-      nextPair = { term: nextTerm, def };
+      nextPair = { term: nextTerm, ...def };
     }
   }
 

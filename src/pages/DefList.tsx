@@ -39,15 +39,12 @@ export const DefList: FC = () => {
     <PageLayout>
       <Typography.Title level={2}>{listsTitles[listId]}</Typography.Title>
       <Stats gap="20px" justify="center" align="center">
-        <PlayCircleFilled />
         <SubjShortStats subj={subj} list={list} mode="forward" />
       </Stats>
       <Stats gap="20px" justify="center" align="center">
-        <ReloadOutlined />
         <SubjShortStats subj={subj} list={list} mode="reverse" />
       </Stats>
       <Stats gap="20px" justify="center" align="center">
-        <EditOutlined />
         <SubjShortStats subj={subj} list={list} mode="spelling" />
       </Stats>
       <ButtonsSection justify="center">

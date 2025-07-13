@@ -1,27 +1,58 @@
 import { styled } from '@linaria/react';
 import { Button, Divider, Flex } from 'antd';
-import { type FC, useRef } from 'react';
+import { type FC, useMemo, useRef } from 'react';
 import type { WordDefinition } from '../../api/defs';
 import { Colors } from '../../consts/colors';
 import { speak } from '../../utils/speak';
-import { TermStatus } from '../TermStatus/TermStatus';
+import { TermStatus } from '../TermStatus';
 import { WordTypeInfo } from '../WordTypeInfo';
 
 export const WordDef: FC<{
-  def: WordDefinition;
+  defPayload: WordDefinition;
   lang: string;
   className?: string;
   detailed?: boolean;
-}> = ({ def, lang, className, detailed }) => {
-  const [audio] = def.audios ?? [];
+  mode?: string;
+  def?: string;
+  type?: string;
+}> = ({
+  defPayload,
+  def,
+  lang,
+  className,
+  detailed,
+  type,
+  mode = 'forward',
+}) => {
+  const [audio] = defPayload.audios ?? [];
 
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  const types = useMemo(
+    () =>
+      type
+        ? defPayload.types.filter((typePayload) => typePayload.type === type)
+        : defPayload.types,
+    [defPayload.types, type],
+  );
+
   return (
     <div className={className}>
-      <DefHeading>
-        <TermStatus subj={lang} mode={'forward'} term={def.title} />
-        {def.title}{' '}
+      <Flex justify="space-between" align="center">
+        {type ? (
+          <TermStatus
+            subj={lang}
+            mode={mode ?? 'forward'}
+            type={type}
+            def={def}
+            term={defPayload.title}
+          />
+        ) : (
+          <span style={{ width: '30px' }} />
+        )}
+
+        <DefHeading>{defPayload.title} </DefHeading>
+
         <VoiceBtn
           shape="circle"
           size="middle"
@@ -31,29 +62,37 @@ export const WordDef: FC<{
             if (audio) {
               audio.play();
             } else {
-              speak(def.title, lang);
+              speak(defPayload.title, lang);
             }
           }}
         >
           {audio ? '🔊' : '🤖'}
         </VoiceBtn>
-        {audio && (
-          <audio ref={audioRef} key={audio.url}>
-            <source src={audio.url} />
-          </audio>
-        )}
-      </DefHeading>
+      </Flex>
+      {audio && (
+        <audio ref={audioRef} key={audio.url}>
+          <source src={audio.url} />
+        </audio>
+      )}
       <IpasList component="ul" justify="center">
-        {def.ipas?.map((ipa) => (
+        {defPayload.ipas?.map((ipa) => (
           <IpaItem key={ipa}>{ipa}</IpaItem>
         ))}
       </IpasList>
       <Divider />
-      {def.types && (
+      {types && (
         <div>
-          {def.types.map((type, index, types) => (
+          {types.map((type, index, types) => (
             <div key={type.type}>
-              <SWordTypeInfo subj={lang} detailed={detailed} type={type} />
+              <SWordTypeInfo
+                hideStatus={!!type}
+                term={defPayload.title}
+                subj={lang}
+                detailed={detailed}
+                type={type}
+                mode={mode}
+                def={def}
+              />
               {index < types.length - 1 && <Divider />}
             </div>
           ))}
@@ -73,7 +112,7 @@ const DefHeading = styled.h1`
   gap: 10px;
   justify-content: center;
   text-align: center;
-  margin-bottom: 5px;
+  margin: 0;
 `;
 
 const IpasList = styled(Flex)`

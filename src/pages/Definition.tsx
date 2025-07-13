@@ -19,7 +19,7 @@ export const Definition: FC = () => {
   return (
     <PageLayout>
       <SCard>
-        <WordDef def={def} lang={subj} />
+        <WordDef defPayload={def} lang={subj} />
       </SCard>
     </PageLayout>
   );

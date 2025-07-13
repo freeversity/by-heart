@@ -22,7 +22,11 @@ export const ForwardGame: FC = () => {
   const subj = useSubj();
   const listId = useListId();
 
-  const [def, setDef] = useState<string | null>(null);
+  const [def, setDef] = useState<{
+    term: string;
+    lemma: string | null;
+    type: string;
+  } | null>(null);
 
   const [isLoadingNext, setLoadingNext] = useState(false);
 
@@ -41,7 +45,7 @@ export const ForwardGame: FC = () => {
         const nextTerm = await getNextForward({
           list,
           subj,
-          term: def,
+          ...def,
           status,
         });
 
@@ -89,7 +93,7 @@ export const ForwardGame: FC = () => {
         </Flex>
       }
     >
-      <SubjShortStats subj={subj} list={list} />
+      <SubjShortStats subj={subj} list={list} mode={mode} />
       <STimer
         onPause={(start, end) => {
           db.durations.add({
@@ -102,11 +106,23 @@ export const ForwardGame: FC = () => {
         }}
       />
       <Content justify="center" align="center">
-        {!!def && <TermStatusHistory term={def} mode={mode} subj={subj} />}
         {!isFlipped && def && (
           <DefCard>
+            {!!def && (
+              <History
+                term={def.term}
+                type={def.type}
+                mode={mode}
+                subj={subj}
+              />
+            )}
             <Suspense fallback="Loading...">
-              <FlashCardContent term={def} mode={mode} subj={subj} />
+              <FlashCardContent
+                term={def.term}
+                type={def.type}
+                mode={mode}
+                subj={subj}
+              />
             </Suspense>
             <Divider />
             <Button
@@ -125,7 +141,21 @@ export const ForwardGame: FC = () => {
         {isFlipped && def && (
           <Suspense fallback="Loading...">
             <FlippedCardWrapper>
-              <FlippedCardContent detailed={false} def={def} subj={subj} />
+              {!!def && (
+                <History
+                  term={def.term}
+                  type={def.type}
+                  mode={mode}
+                  subj={subj}
+                />
+              )}
+              <FlippedCardContent
+                detailed={false}
+                term={def.term}
+                type={def.type}
+                mode={mode}
+                subj={subj}
+              />
             </FlippedCardWrapper>
             <Flex gap="10px">
               <Button
@@ -164,7 +194,7 @@ export const ForwardGame: FC = () => {
         >
           <ErrorBoundary>
             <Suspense>
-              <FullInfoCard def={def} subj={subj} />
+              <FullInfoCard term={def.term} mode={mode} subj={subj} />
             </Suspense>
           </ErrorBoundary>
 
@@ -224,4 +254,8 @@ const CloseDrawerButton = styled(Button)`
 
 const STimer = styled(Timer)`
     margin: 5px 0;
+`;
+
+const History = styled(TermStatusHistory)`
+    margin-bottom: 10px;
 `;

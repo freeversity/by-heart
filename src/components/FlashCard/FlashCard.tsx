@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { Button, Flex, Skeleton } from 'antd';
+import { Button, Flex, Skeleton, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, useRef } from 'react';
 import { Colors } from '../../consts/colors';
@@ -12,6 +12,7 @@ export const FlashCard: FC<{
   def?: string;
   subj: string;
   mode: string;
+  type: string;
   className?: string;
   hidden?: boolean;
   ipaHidden?: boolean;
@@ -25,6 +26,7 @@ export const FlashCard: FC<{
   ipaHidden,
   mode,
   def,
+  type,
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [defPayload] = useAtom(definitionAtom({ subj, def: term }));
@@ -33,11 +35,28 @@ export const FlashCard: FC<{
 
   return (
     <div className={className}>
-      <DefHeading>
-        {!hidden && (
-          <TermStatus subj={subj} mode={mode} term={term} def={def} />
+      <Flex justify="space-between" align="center">
+        {hidden ? (
+          <span style={{ width: '30px' }} />
+        ) : (
+          <TermStatus
+            subj={subj}
+            mode={mode}
+            term={term}
+            type={type}
+            def={def}
+          />
         )}
-        {hidden ? <HiddenTitle /> : defPayload.title}{' '}
+
+        <DefHeading>
+          {hidden ? (
+            <HiddenTitle />
+          ) : (
+            <>
+              {defPayload.title} {type && <TypeLabel>({type})</TypeLabel>}
+            </>
+          )}
+        </DefHeading>
         <VoiceBtn
           shape="circle"
           size="middle"
@@ -55,12 +74,13 @@ export const FlashCard: FC<{
         >
           {audio ? '🔊' : '🤖'}
         </VoiceBtn>
-        {audio && (
-          <audio ref={audioRef} key={audio.url}>
-            <source src={audio.url} />
-          </audio>
-        )}
-      </DefHeading>
+      </Flex>
+
+      {audio && (
+        <audio ref={audioRef} key={audio.url}>
+          <source src={audio.url} />
+        </audio>
+      )}
       {!ipaHidden && (
         <IpasList wrap="wrap" component="ul" justify="center">
           {defPayload.ipas?.map((ipa) => (
@@ -77,12 +97,13 @@ const VoiceBtn = styled(Button)`
 `;
 
 const DefHeading = styled.h1`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-  text-align: center;
-  margin-bottom: 5px;
+  margin: 0;
+`;
+
+const TypeLabel = styled(Typography.Text)`
+  color: ${Colors.neutral[6]};
+  font-size: 0.8em;
+  font-style: italic;
 `;
 
 const IpasList = styled(Flex)`

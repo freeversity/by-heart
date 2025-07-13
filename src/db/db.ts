@@ -28,6 +28,8 @@ export interface DefStatus {
   mode: string;
   timestamp: number;
   def: string;
+  lemma: string;
+  type: string;
 }
 
 export interface DefProgressEvent {
@@ -38,6 +40,8 @@ export interface DefProgressEvent {
   status: 'unknown' | 'awared' | 'mastered' | 'excluded';
   timestamp: number;
   mode: string;
+  lemma: string;
+  type: string;
 }
 export interface GameDurationEvent {
   id: number;
@@ -59,7 +63,8 @@ export const db = new Dexie('lists') as Dexie & {
 db.version(2).stores({
   lists: '[subj+term+list]',
   terms: '[subj+term+def]',
-  progress: '++id, subj, def, status, timestamp, mode, term',
-  statuses: '[subj+mode+term+def], status, term, timestamp, subj, def, mode',
+  progress: '++id, subj, def, status, timestamp, mode, term, lemma, type',
+  statuses:
+    '[subj+mode+term+def+type], status, term, timestamp, subj, def, mode, lemma, type',
   durations: '++id, subj, mode, listId, timestamp, duration',
 });

@@ -26,8 +26,9 @@ export const WordTypeLabel: FC<{
 };
 
 const FormLabel = styled.span`
-    color: ${Colors.greys[2]};
-    font-size: 0.8em;
-    font-weight: 400;
-    font-style: italic;
+  text-align: left;
+  color: ${Colors.greys[2]};
+  font-size: 0.9em;
+  font-weight: 400;
+  font-style: italic;
 `;
