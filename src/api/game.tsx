@@ -1,14 +1,15 @@
 import {
-  AWARED_PROB,
+  AWARED_PROB_EVEN,
   AWARED_TIMEOUT_MS,
-  MASTERED_PROB,
+  MASTERED_PROB_EVEN,
   MASTERED_TIMEOUT_MS,
   NEW_WORD_DRAW_SIZE,
   REVERSE_TERM_TIMEOUT_MS,
-  UNKNOWN_PROB,
+  UNKNOWN_PROB_EVEN,
   UNKNOWN_TIMEOUT_MS,
 } from '../consts/discovery';
-import { type Status, db } from '../db/db';
+import { Status, db } from '../db/db';
+import { pickTermCategory } from '../utils/pickTermCategory';
 import { getDef } from './defs';
 
 export async function getNextForward({
@@ -87,35 +88,41 @@ export async function getNextForward({
         .toArray(),
     ]);
 
-  const random = Math.floor(Math.random() * 100);
+  const introducedSet = new Set(allIntroduced.map(({ term }) => term));
 
-  let nextDef: string | undefined;
+  const newTerms = list
+    .filter((def) => !introducedSet.has(def))
+    .slice(0, NEW_WORD_DRAW_SIZE);
 
-  if (random < MASTERED_PROB && staledMastered.length) {
-    const randomIndex = Math.floor(Math.random() * staledMastered.length);
+  const newTermCat = pickTermCategory({
+    masteredCount: staledMastered.length,
+    awaredCount: staledAwared.length,
+    unknownCount: staledUnknown.length,
+    newCount: newTerms.length,
+  });
 
-    nextDef = staledMastered[randomIndex]?.term;
-  } else if (random < AWARED_PROB && staledAwared.length) {
-    const randomIndex = Math.floor(Math.random() * staledAwared.length);
+  switch (newTermCat) {
+    case Status.Mastered: {
+      const randomIndex = Math.floor(Math.random() * staledMastered.length);
 
-    nextDef = staledAwared[randomIndex]?.term;
-  } else if (random < UNKNOWN_PROB && staledUnknown.length) {
-    const randomIndex = Math.floor(Math.random() * staledUnknown.length);
+      return staledMastered[randomIndex]?.term;
+    }
+    case Status.Awared: {
+      const randomIndex = Math.floor(Math.random() * staledAwared.length);
 
-    nextDef = staledUnknown[randomIndex]?.term;
-  } else {
-    const introducedSet = new Set(allIntroduced.map(({ term }) => term));
+      return staledAwared[randomIndex]?.term;
+    }
+    case Status.Unknown: {
+      const randomIndex = Math.floor(Math.random() * staledUnknown.length);
 
-    const listToChoose = list
-      .filter((def) => !introducedSet.has(def))
-      .slice(0, NEW_WORD_DRAW_SIZE);
+      return staledUnknown[randomIndex]?.term;
+    }
+    default: {
+      const randomIndex = Math.floor(Math.random() * newTerms.length);
 
-    const randomIndex = Math.floor(Math.random() * listToChoose.length);
-
-    nextDef = listToChoose[randomIndex];
+      return newTerms[randomIndex];
+    }
   }
-
-  return nextDef;
 }
 
 export async function getNextReverse({
@@ -240,36 +247,41 @@ export async function getNextReverse({
         .toArray(),
     ]);
 
-  const random = Math.floor(Math.random() * 100);
+  const excluded = new Set();
+  const exhaustedSet = new Set(exhaustedDefs.map(({ term }) => term));
+
+  const listToChoose = list
+    .filter((def) => !exhaustedSet.has(def) && !excluded.has(def))
+    .slice(0, NEW_WORD_DRAW_SIZE);
+
+  const newTermCat = pickTermCategory({
+    masteredCount: staledMastered.length,
+    awaredCount: staledAwared.length,
+    unknownCount: staledUnknown.length,
+    newCount: listToChoose.length,
+  });
 
   let nextPair: { def: string; term: string } | undefined;
 
-  if (random < MASTERED_PROB && staledMastered.length) {
+  if (newTermCat === Status.Mastered) {
     const randomIndex = Math.floor(Math.random() * staledMastered.length);
 
     const { term, def } = staledMastered[randomIndex] ?? {};
 
     nextPair = term && def ? { term, def } : undefined;
-  } else if (random < AWARED_PROB && staledAwared.length) {
+  } else if (newTermCat === Status.Awared) {
     const randomIndex = Math.floor(Math.random() * staledAwared.length);
 
     const { term, def } = staledAwared[randomIndex] ?? {};
 
     nextPair = term && def ? { term, def } : undefined;
-  } else if (random < UNKNOWN_PROB && staledUnknown.length) {
+  } else if (newTermCat === Status.Unknown) {
     const randomIndex = Math.floor(Math.random() * staledUnknown.length);
 
     const { term, def } = staledUnknown[randomIndex] ?? {};
 
     nextPair = term && def ? { term, def } : undefined;
   } else {
-    const excluded = new Set();
-    const exhaustedSet = new Set(exhaustedDefs.map(({ term }) => term));
-
-    const listToChoose = list
-      .filter((def) => !exhaustedSet.has(def) && !excluded.has(def))
-      .slice(0, NEW_WORD_DRAW_SIZE);
-
     const randomIndex = Math.floor(Math.random() * listToChoose.length);
 
     const initTerm = listToChoose[randomIndex];

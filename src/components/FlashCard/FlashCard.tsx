@@ -5,27 +5,44 @@ import { type FC, useRef } from 'react';
 import { Colors } from '../../consts/colors';
 import { definitionAtom } from '../../state/currentDef/atoms';
 import { speak } from '../../utils/speak';
+import { TermStatus } from '../TermStatus/TermStatus';
 
 export const FlashCard: FC<{
-  def: string;
+  term: string;
+  def?: string;
   subj: string;
+  mode: string;
   className?: string;
   hidden?: boolean;
-}> = ({ def, subj, className, hidden }) => {
+  ipaHidden?: boolean;
+  setIpaHidden?: (isHidden: boolean) => void;
+}> = ({
+  term,
+  subj,
+  className,
+  hidden,
+  setIpaHidden,
+  ipaHidden,
+  mode,
+  def,
+}) => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [defPayload] = useAtom(definitionAtom({ subj, def }));
+  const [defPayload] = useAtom(definitionAtom({ subj, def: term }));
 
   const [audio] = defPayload.audios ?? [];
 
   return (
     <div className={className}>
       <DefHeading>
+        <TermStatus subj={subj} mode={mode} term={term} def={def} />
         {hidden ? <HiddenTitle /> : defPayload.title}{' '}
         <VoiceBtn
           shape="circle"
           size="middle"
           onClick={() => {
             const audio = audioRef.current;
+
+            setIpaHidden?.(false);
 
             if (audio) {
               audio.play();
@@ -42,11 +59,13 @@ export const FlashCard: FC<{
           </audio>
         )}
       </DefHeading>
-      <IpasList wrap="wrap" component="ul" justify="center">
-        {defPayload.ipas?.map((ipa) => (
-          <IpaItem key={ipa}>{ipa}</IpaItem>
-        ))}
-      </IpasList>
+      {!ipaHidden && (
+        <IpasList wrap="wrap" component="ul" justify="center">
+          {defPayload.ipas?.map((ipa) => (
+            <IpaItem key={ipa}>{ipa}</IpaItem>
+          ))}
+        </IpasList>
+      )}
     </div>
   );
 };
@@ -67,6 +86,7 @@ const DefHeading = styled.h1`
 const IpasList = styled(Flex)`
   margin: 10px 0;
   list-style: none;
+  flex-wrap: wrap;
 `;
 
 const IpaItem = styled.li`

@@ -4,6 +4,7 @@ import { type FC, useRef } from 'react';
 import type { WordDefinition } from '../../api/defs';
 import { Colors } from '../../consts/colors';
 import { speak } from '../../utils/speak';
+import { TermStatus } from '../TermStatus/TermStatus';
 import { WordTypeInfo } from '../WordTypeInfo';
 
 export const WordDef: FC<{
@@ -19,6 +20,7 @@ export const WordDef: FC<{
   return (
     <div className={className}>
       <DefHeading>
+        <TermStatus subj={lang} mode={'forward'} term={def.title} />
         {def.title}{' '}
         <VoiceBtn
           shape="circle"
@@ -77,6 +79,7 @@ const DefHeading = styled.h1`
 const IpasList = styled(Flex)`
   margin: 10px 0;
   list-style: none;
+  flex-wrap: wrap;
 `;
 
 const IpaItem = styled.li`

@@ -12,6 +12,7 @@ import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FlippedCard } from '../FlippedCard/FlippedCard';
 import { PageLayout } from '../PageLayout';
 import { SubjShortStats } from '../SubjShortStats';
+import { TermStatus } from '../TermStatus/TermStatus';
 import { Timer } from '../Timer/Timer';
 
 const mode = 'reverse';
@@ -103,6 +104,12 @@ export const ReverseGame: FC = () => {
         {!isFlipped && pair && (
           <DefCard>
             <Typography.Text strong italic>
+              <TermStatus
+                subj={subj}
+                mode={mode}
+                term={pair.term}
+                def={pair.def}
+              />{' '}
               {pair.def}
             </Typography.Text>
             <Divider />

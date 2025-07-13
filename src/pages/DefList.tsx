@@ -4,7 +4,7 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import { styled } from '@linaria/react';
-import { Button, Flex, Pagination, Table, Typography } from 'antd';
+import { Button, Flex, Pagination, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -50,7 +50,7 @@ export const DefList: FC = () => {
         <EditOutlined />
         <SubjShortStats subj={subj} list={list} mode="spelling" />
       </Stats>
-      <Flex justify="center" gap="10px">
+      <ButtonsSection justify="center">
         <Button
           color="blue"
           icon={<PlayCircleFilled />}
@@ -78,7 +78,7 @@ export const DefList: FC = () => {
         >
           Spelling bee
         </Button>
-      </Flex>
+      </ButtonsSection>
       <Typography.Title level={2}>
         Definitions ({Intl.NumberFormat().format(list.length)})
       </Typography.Title>
@@ -107,6 +107,11 @@ export const DefList: FC = () => {
 
 const Stats = styled(Flex)`
   margin-bottom: 15px;
+`;
+const ButtonsSection = styled(Flex)`
+  margin-bottom: 15px;
+  gap: 10px;
+  flex-wrap: wrap;
 `;
 
 const PagesControl = styled(Pagination)`

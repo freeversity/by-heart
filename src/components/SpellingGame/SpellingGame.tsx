@@ -33,6 +33,7 @@ export const SpellingGame: FC = () => {
   const listId = useListId();
 
   const [pair, setPair] = useState<{ term: string; def: string } | null>(null);
+  const [ipaHidden, setIpaHidden] = useState(true);
 
   const [isLoadingNext, setLoadingNext] = useState(false);
 
@@ -174,7 +175,15 @@ export const SpellingGame: FC = () => {
             <Typography.Title level={3}>{pair.def}</Typography.Title>
             <Divider />
             <Suspense>
-              <FlashCardContent hidden def={pair.term} subj={subj} />
+              <FlashCardContent
+                hidden
+                mode={mode}
+                term={pair.term}
+                def={pair.def}
+                subj={subj}
+                ipaHidden={ipaHidden}
+                setIpaHidden={setIpaHidden}
+              />
             </Suspense>
             <Divider />
             <Form

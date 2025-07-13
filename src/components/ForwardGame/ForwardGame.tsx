@@ -104,7 +104,7 @@ export const ForwardGame: FC = () => {
         {!isFlipped && def && (
           <DefCard>
             <Suspense fallback="Loading...">
-              <FlashCardContent def={def} subj={subj} />
+              <FlashCardContent term={def} mode={mode} subj={subj} />
             </Suspense>
             <Divider />
             <Button
