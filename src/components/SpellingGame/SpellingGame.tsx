@@ -63,6 +63,7 @@ export const SpellingGame: FC = () => {
         setFlipped(false);
         setShowFull(false);
         setGuess('');
+        setIpaHidden(true);
 
         const nextTerm = await getNextReverse({
           list,
