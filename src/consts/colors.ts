@@ -1,13 +1,24 @@
-import { blue, green, grey, yellow } from '@ant-design/colors';
+import { blue, green, grey, red, yellow } from '@ant-design/colors';
 
 export const Colors = {
   logoBlue: '#0057b8',
   logoYellow: '#ffd700',
   mastered: green[7] as string,
-  whites: green[7] as string,
   excluded: grey[0] as string,
   awared: blue[4] as string,
   unknown: yellow[5] as string,
+  red: red as [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+  ],
   neutral: [
     '#ffffff',
     '#fafafa',

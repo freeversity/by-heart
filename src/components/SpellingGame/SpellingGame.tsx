@@ -24,6 +24,8 @@ import { FlashCard } from '../FlashCard';
 import { FlippedCard } from '../FlippedCard/FlippedCard';
 import { PageLayout } from '../PageLayout';
 import { SubjShortStats } from '../SubjShortStats';
+import { TermStatus } from '../TermStatus';
+import { TermStatusHistory } from '../TermStatusHistory';
 import { Timer } from '../Timer/Timer';
 
 const mode = 'spelling';
@@ -170,9 +172,20 @@ export const SpellingGame: FC = () => {
         }}
       />
       <Content justify="center" align="center">
+        {pair && (
+          <TermStatusHistory
+            mode={mode}
+            term={pair.term}
+            def={pair.def}
+            subj={subj}
+          />
+        )}
         {!isFlipped && pair && (
           <DefCard>
-            <Typography.Title level={3}>{pair.def}</Typography.Title>
+            <Typography.Title level={3}>
+              <Status mode={mode} term={pair.term} def={pair.def} subj={subj} />{' '}
+              {pair.def}
+            </Typography.Title>
             <Divider />
             <Suspense>
               <FlashCardContent
@@ -271,6 +284,11 @@ const Content = styled(Flex)`
 const DefCard = styled(Card)`
     width: fit-content;
     min-width: 300px;
+    margin-bottom: 20%;
+`;
+
+const Status = styled(TermStatus)`
+  vertical-align: middle;
 `;
 
 const FlashCardContent = styled(FlashCard)`

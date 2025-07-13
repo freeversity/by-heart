@@ -13,6 +13,7 @@ import { FlippedCard } from '../FlippedCard/FlippedCard';
 import { PageLayout } from '../PageLayout';
 import { SubjShortStats } from '../SubjShortStats';
 import { TermStatus } from '../TermStatus/TermStatus';
+import { TermStatusHistory } from '../TermStatusHistory';
 import { Timer } from '../Timer/Timer';
 
 const mode = 'reverse';
@@ -101,6 +102,14 @@ export const ReverseGame: FC = () => {
         }}
       />
       <Content justify="center" align="center">
+        {pair && (
+          <TermStatusHistory
+            subj={subj}
+            mode={mode}
+            term={pair.term}
+            def={pair.def}
+          />
+        )}
         {!isFlipped && pair && (
           <DefCard>
             <Typography.Text strong italic>
@@ -203,6 +212,7 @@ const Content = styled(Flex)`
 const DefCard = styled(Card)`
     width: fit-content;
     min-width: 300px;
+    margin-bottom: 20%;
 `;
 
 const FlippedCardWrapper = styled(Card)`

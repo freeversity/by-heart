@@ -13,6 +13,7 @@ import { FlashCard } from '../FlashCard';
 import { FlippedCard } from '../FlippedCard/FlippedCard';
 import { PageLayout } from '../PageLayout';
 import { SubjShortStats } from '../SubjShortStats';
+import { TermStatusHistory } from '../TermStatusHistory';
 import { Timer } from '../Timer/Timer';
 
 const mode = 'forward';
@@ -101,6 +102,7 @@ export const ForwardGame: FC = () => {
         }}
       />
       <Content justify="center" align="center">
+        {!!def && <TermStatusHistory term={def} mode={mode} subj={subj} />}
         {!isFlipped && def && (
           <DefCard>
             <Suspense fallback="Loading...">
@@ -183,7 +185,7 @@ export const ForwardGame: FC = () => {
 };
 
 const Content = styled(Flex)`
-    gap: 20px;
+    gap: 10px;
     flex-direction: column;
     display: flex;
     width: 100%;

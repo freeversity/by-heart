@@ -34,7 +34,9 @@ export const FlashCard: FC<{
   return (
     <div className={className}>
       <DefHeading>
-        <TermStatus subj={subj} mode={mode} term={term} def={def} />
+        {!hidden && (
+          <TermStatus subj={subj} mode={mode} term={term} def={def} />
+        )}
         {hidden ? <HiddenTitle /> : defPayload.title}{' '}
         <VoiceBtn
           shape="circle"
