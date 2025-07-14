@@ -1,6 +1,7 @@
 import { type FC, useEffect, useMemo, useState } from 'react';
 import { useBrowserTabActive } from '../../hooks/useBrowserTabActive';
 import { useRefCallback } from '../../hooks/useRefCallback';
+import { formatDuration } from '../../utils/formatDuration';
 
 export const Timer: FC<{
   className?: string;
@@ -55,17 +56,13 @@ export const Timer: FC<{
     now -
     start;
 
-  const hours = Math.floor(delta / 1000 / 60 / 60);
-  const mins = Math.floor((delta - hours * 1000 * 60 * 60) / 1000 / 60);
-  const secs = Math.floor(
-    (delta - hours * 1000 * 60 * 60 - mins * 1000 * 60) / 1000,
-  );
+  const { h, m, s } = formatDuration(delta);
 
   return (
     <div className={className}>
-      {!!hours && <span>{`${hours}`.padStart(2, '0')}:</span>}
-      <span>{`${mins}`.padStart(2, '0')}:</span>
-      <span>{`${secs}`.padStart(2, '0')}</span>
+      {!!h && <span>{h}:</span>}
+      <span>{m}:</span>
+      <span>{s}</span>
     </div>
   );
 };

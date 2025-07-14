@@ -5,15 +5,18 @@ import {
 } from '@ant-design/icons';
 import { styled } from '@linaria/react';
 import { Button, Flex, Pagination, Typography } from 'antd';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useAtom } from 'jotai';
 import { type FC, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { PageLayout } from '../components/PageLayout';
 import { SubjShortStats } from '../components/SubjShortStats';
 import { TermLink } from '../components/TermLink/TermLink';
+import { db } from '../db';
 import { useListId, useSubj } from '../hooks/useSubj';
 import { currentListAtom } from '../state/currentList/atoms';
 import { DEF_PAGE_SIZE } from '../state/definitions/atoms';
+import { formatDuration } from '../utils/formatDuration';
 
 const listsTitles: Record<string, string> = {
   fr_50k: '50K Most used French words',
@@ -33,6 +36,64 @@ export const DefList: FC = () => {
     [list, page],
   );
 
+  const today = useMemo(() => {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const day = now.getDate();
+
+    return new Date(year, month, day);
+  }, []);
+
+  const forwardTimes = useLiveQuery(() =>
+    db.durations
+      .where({ mode: 'forward' })
+      .and(({ timestamp }) => timestamp > +today)
+      .toArray(),
+  );
+
+  const forwarwardDur = useMemo(
+    () =>
+      formatDuration(
+        forwardTimes?.reduce((duration, item) => duration + item.duration, 0) ??
+          0,
+      ),
+    [forwardTimes],
+  );
+
+  const reverseTimes = useLiveQuery(() =>
+    db.durations
+      .where({ mode: 'reverse' })
+      .and(({ timestamp }) => timestamp > +today)
+      .toArray(),
+  );
+
+  const reverseDur = useMemo(
+    () =>
+      formatDuration(
+        reverseTimes?.reduce((duration, item) => duration + item.duration, 0) ??
+          0,
+      ),
+    [reverseTimes],
+  );
+
+  const spellTimes = useLiveQuery(() =>
+    db.durations
+      .where({ mode: 'spelling' })
+      .and(({ timestamp }) => timestamp > +today)
+      .toArray(),
+  );
+
+  const spellDur = useMemo(
+    () =>
+      formatDuration(
+        spellTimes?.reduce((duration, item) => duration + item.duration, 0) ??
+          0,
+      ),
+    [spellTimes],
+  );
+
   const navigate = useNavigate();
 
   return (
@@ -40,12 +101,28 @@ export const DefList: FC = () => {
       <Typography.Title level={2}>{listsTitles[listId]}</Typography.Title>
       <Stats gap="20px" justify="center" align="center">
         <SubjShortStats subj={subj} list={list} mode="forward" />
+
+        <div>
+          {!!forwarwardDur.h && <span>{forwarwardDur.h}:</span>}
+          <span>{forwarwardDur.m}:</span>
+          <span>{forwarwardDur.s}</span>
+        </div>
       </Stats>
       <Stats gap="20px" justify="center" align="center">
         <SubjShortStats subj={subj} list={list} mode="reverse" />
+        <div>
+          {!!reverseDur.h && <span>{reverseDur.h}:</span>}
+          <span>{reverseDur.m}:</span>
+          <span>{reverseDur.s}</span>
+        </div>
       </Stats>
       <Stats gap="20px" justify="center" align="center">
         <SubjShortStats subj={subj} list={list} mode="spelling" />
+        <div>
+          {!!spellDur.h && <span>{spellDur.h}:</span>}
+          <span>{spellDur.m}:</span>
+          <span>{spellDur.s}</span>
+        </div>
       </Stats>
       <ButtonsSection justify="center">
         <Button
