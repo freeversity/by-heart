@@ -141,14 +141,6 @@ export const SpellingGame: FC = () => {
               <Flex gap="5px">
                 <SpellingInput
                   autoFocus
-                  onFocus={() => {
-                    setTimeout(() => {
-                      cardRef.current?.scrollIntoView({
-                        behavior: 'instant',
-                        block: 'center',
-                      });
-                    }, 500);
-                  }}
                   placeholder="Spell the word"
                   autoComplete="off"
                   autoCorrect="off"

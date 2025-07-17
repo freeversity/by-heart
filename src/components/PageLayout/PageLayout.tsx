@@ -1,11 +1,12 @@
 import { styled } from '@linaria/react';
-import { Flex, Layout } from 'antd';
+import { Layout as AntdLayout, Flex } from 'antd';
 import type { FC, ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { DefSearch } from '../DefSearch';
 import { LogoIcon } from '../Logo/Logo';
 import { Footer } from './Footer';
 import { Header } from './Header';
+import { Layout } from './Layout';
 
 export const PageLayout: FC<{
   className?: string;
@@ -16,7 +17,7 @@ export const PageLayout: FC<{
   const { subj } = useParams();
 
   return (
-    <SLayout className={className} data-footer={!!footer}>
+    <Layout className={className} data-footer={!!footer}>
       <Header>
         <HeaderContent justify="space-between">
           <Link to="/">
@@ -28,18 +29,9 @@ export const PageLayout: FC<{
       </Header>
       <SContent>{children}</SContent>
       {footer && <Footer>{footer}</Footer>}
-    </SLayout>
+    </Layout>
   );
 };
-
-const SLayout = styled(Layout)`
-  overflow: hidden;
-  width: 'calc(50% - 8px)';
-  max-width: 'calc(50% - 8px)';
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-`;
 
 const Search = styled(DefSearch)`
   @media (max-width: 800px) {
@@ -52,7 +44,7 @@ const HeaderContent = styled(Flex)`
   width: 100%;
 `;
 
-const SContent = styled(Layout.Content)`
+const SContent = styled(AntdLayout.Content)`
   text-align: center;
   min-height: 120px;
   padding: 74px 20px 20px;
