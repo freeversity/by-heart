@@ -39,7 +39,19 @@ export const Timer: FC<{
     setNow(now);
 
     const timer = setInterval(() => {
-      setNow(Date.now());
+      setNow((prevNow) => {
+        const now = Date.now();
+
+        if (now - prevNow < 5000) {
+          return now;
+        }
+
+        setTimeout(() => {
+          pauseTimer();
+        }, 0);
+
+        return prevNow;
+      });
     }, 500);
 
     return () => {
