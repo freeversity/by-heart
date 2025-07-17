@@ -1,6 +1,8 @@
 import { styled } from '@linaria/react';
-import { Flex, List, Pagination, Skeleton, Typography } from 'antd';
+import { Flex, List, Skeleton, Typography } from 'antd';
 import { useAtom } from 'jotai';
+import { Paginator } from 'primereact/paginator';
+import { Panel } from 'primereact/panel';
 import { type FC, Suspense } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router';
 import { DefsPages } from '../components/DefsPages/DefsPages';
@@ -42,33 +44,35 @@ export const Subj: FC = () => {
           </List.Item>
         ))}
       </List>
-      <Typography.Title level={2}>Definitions</Typography.Title>
+      <Panel
+        header={'Definitions'}
+        footer={
+          <PagesControl
+            first={(page - 1) * DEF_PAGE_SIZE}
+            rows={DEF_PAGE_SIZE}
+            totalRecords={totalPages}
+            // ={page}
+            onPageChange={({ page }) => {
+              const params = new URLSearchParams([['page', `${page + 1}`]]);
 
-      <Suspense
-        fallback={
-          <Flex wrap="wrap" gap="5px 15px">
-            {new Array(100).fill(null).map((_item, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: no sorting
-              <DefSkeleton key={index} />
-            ))}
-          </Flex>
+              setParams(params);
+            }}
+          />
         }
       >
-        <DefsPages />
-      </Suspense>
-      <Flex justify="center">
-        <PagesControl
-          pageSize={DEF_PAGE_SIZE}
-          showSizeChanger={false}
-          total={totalPages}
-          current={page}
-          onChange={(page) => {
-            const params = new URLSearchParams([['page', `${page}`]]);
-
-            setParams(params);
-          }}
-        />
-      </Flex>
+        <Suspense
+          fallback={
+            <Flex wrap="wrap" gap="5px 15px">
+              {new Array(DEF_PAGE_SIZE).fill(null).map((_item, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: no sorting
+                <DefSkeleton key={index} />
+              ))}
+            </Flex>
+          }
+        >
+          <DefsPages />
+        </Suspense>
+      </Panel>
     </PageLayout>
   );
 };
@@ -79,6 +83,5 @@ export const DefSkeleton = styled(Skeleton.Button)`
   width: 120px;
 `;
 
-export const PagesControl = styled(Pagination)`
-  padding: 20px 0;
+export const PagesControl = styled(Paginator)`
 `;

@@ -5,16 +5,7 @@ import {
   UpOutlined,
 } from '@ant-design/icons';
 import { styled } from '@linaria/react';
-import {
-  Button,
-  Card,
-  Divider,
-  Drawer,
-  Flex,
-  Input,
-  type InputRef,
-  Typography,
-} from 'antd';
+import { Button, Card, Divider, Drawer, Flex, Input, Typography } from 'antd';
 import { useAtom } from 'jotai';
 import { type FC, Suspense, useEffect, useRef, useState } from 'react';
 import { getNextReverse } from '../../api/game';
@@ -58,7 +49,6 @@ export const SpellingGame: FC = () => {
   const [list] = useAtom(currentListAtom({ subj, id: listId }));
 
   const nextBtnRef = useRef<HTMLButtonElement>(null);
-  const inputRef = useRef<InputRef>(null);
 
   const status =
     guess.toLocaleLowerCase().trim() === pair?.term.toLocaleLowerCase() &&
@@ -89,17 +79,6 @@ export const SpellingGame: FC = () => {
 
         if (nextTerm) {
           setPair(nextTerm);
-
-          requestAnimationFrame(() => {
-            inputRef.current?.focus();
-
-            setTimeout(() => {
-              inputRef.current?.input?.scrollIntoView({
-                behavior: 'instant',
-                block: 'end',
-              });
-            }, 500);
-          });
         }
       } catch (err) {
         console.error(err);
@@ -113,13 +92,15 @@ export const SpellingGame: FC = () => {
     onNext();
   }, [onNext]);
 
+  const cardRef = useRef<HTMLDivElement>(null);
+
   return (
     <PageLayout
       header={listId}
       footer={
-        <Flex gap="20px" justify="center">
+        <>
           {isFlipped && (
-            <>
+            <Flex gap="20px" justify="center">
               <Button
                 icon={<InfoCircleOutlined />}
                 size="large"
@@ -143,37 +124,71 @@ export const SpellingGame: FC = () => {
               >
                 Next
               </Button>
-            </>
+            </Flex>
           )}
           {!isFlipped && (
-            <>
-              <Button
-                icon="🙈"
-                onClick={() => {
-                  setFlipped(true);
-                }}
-                loading={isLoadingNext}
-              >
-                Flip!
-              </Button>
-              <Button
-                icon="🤓"
-                color="primary"
-                variant="solid"
-                onClick={() => {
-                  setFlipped(true);
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
 
-                  requestAnimationFrame(() => {
-                    nextBtnRef.current?.focus();
-                  });
-                }}
-                loading={isLoadingNext}
-              >
-                Submit
-              </Button>
-            </>
+                setFlipped(true);
+
+                requestAnimationFrame(() => {
+                  nextBtnRef.current?.focus();
+                });
+              }}
+            >
+              <Flex gap="5px">
+                <SpellingInput
+                  autoFocus
+                  onFocus={() => {
+                    setTimeout(() => {
+                      cardRef.current?.scrollIntoView({
+                        behavior: 'instant',
+                        block: 'center',
+                      });
+                    }, 500);
+                  }}
+                  placeholder="Spell the word"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  value={guess}
+                  onChange={(e) => {
+                    setGuess(e.target.value);
+                  }}
+                />
+                <Button
+                  icon="🙈"
+                  onClick={() => {
+                    setFlipped(true);
+                  }}
+                  loading={isLoadingNext}
+                >
+                  Flip!
+                </Button>
+                <Button
+                  icon="🤓"
+                  color="primary"
+                  variant="solid"
+                  onClick={() => {
+                    setFlipped(true);
+
+                    requestAnimationFrame(() => {
+                      nextBtnRef.current?.focus();
+                    });
+                  }}
+                  loading={isLoadingNext}
+                >
+                  Submit
+                </Button>
+              </Flex>
+
+              <SubmitInput type="submit" />
+            </Form>
           )}
-        </Flex>
+        </>
       }
     >
       <SubjShortStats subj={subj} list={list} mode="spelling" />
@@ -190,7 +205,7 @@ export const SpellingGame: FC = () => {
       />
       <Content justify="center" align="center">
         {!isFlipped && pair && (
-          <DefCard>
+          <DefCard ref={cardRef}>
             <Flex justify="space-between" align="center" gap="10px">
               <TermStatus
                 mode={mode}
@@ -221,9 +236,9 @@ export const SpellingGame: FC = () => {
                 subj={subj}
               />
             )}
-            <Divider />
 
             <Suspense>
+              <Divider />
               <FlashCardContent
                 hidden
                 mode={mode}
@@ -235,38 +250,12 @@ export const SpellingGame: FC = () => {
                 setIpaHidden={setIpaHidden}
               />
             </Suspense>
-            <Divider />
             {translationType && (
               <Suspense>
-                <TransList term={pair.term} subj={subj} type={pair.type} />
                 <Divider />
+                <TransList term={pair.term} subj={subj} type={pair.type} />
               </Suspense>
             )}
-            <Form
-              onSubmit={(e) => {
-                e.preventDefault();
-
-                setFlipped(true);
-
-                requestAnimationFrame(() => {
-                  nextBtnRef.current?.focus();
-                });
-              }}
-            >
-              <SpellingInput
-                ref={inputRef}
-                placeholder="Spell the word"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                value={guess}
-                onChange={(e) => {
-                  setGuess(e.target.value);
-                }}
-              />
-              <SubmitInput type="submit" />
-            </Form>
           </DefCard>
         )}
         {isFlipped && pair && (
@@ -387,12 +376,14 @@ const Form = styled.form`
 
 const SpellingInput = styled(Input)`
   margin: 0;
+  flex-grow: 1;
 `;
 
 const SubmitInput = styled(Input)`
   visibility: hidden;
   height: 1px;
   padding: 0;
+  position: absolute;
 `;
 
 const TypeLabel = styled(Typography.Text)`

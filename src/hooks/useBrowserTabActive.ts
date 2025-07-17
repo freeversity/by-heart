@@ -10,7 +10,7 @@ export function useBrowserTabActive() {
     let timer: number;
 
     const scheduleInactive = () => {
-      setActive(true);
+      setActive(document.visibilityState === 'visible');
       clearTimeout(timer);
 
       timer = setTimeout(() => {
@@ -27,7 +27,7 @@ export function useBrowserTabActive() {
       window.removeEventListener('touchstart', scheduleInactive);
       window.removeEventListener('mousemove', scheduleInactive);
     };
-  });
+  }, []);
 
   useEffect(() => {
     const updateVisibility = debounce(() => {

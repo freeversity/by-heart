@@ -4,6 +4,8 @@ import type { FC, ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { DefSearch } from '../DefSearch';
 import { LogoIcon } from '../Logo/Logo';
+import { Footer } from './Footer';
+import { Header } from './Header';
 
 export const PageLayout: FC<{
   className?: string;
@@ -15,7 +17,7 @@ export const PageLayout: FC<{
 
   return (
     <SLayout className={className} data-footer={!!footer}>
-      <SHeader>
+      <Header>
         <HeaderContent justify="space-between">
           <Link to="/">
             <SLogo />
@@ -23,9 +25,9 @@ export const PageLayout: FC<{
           {header}
           {subj && <Search subj={subj} />}
         </HeaderContent>
-      </SHeader>
+      </Header>
       <SContent>{children}</SContent>
-      {footer && <SFooter>{footer}</SFooter>}
+      {footer && <Footer>{footer}</Footer>}
     </SLayout>
   );
 };
@@ -45,43 +47,9 @@ const Search = styled(DefSearch)`
   }
 `;
 
-const SHeader = styled(Layout.Header)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #fff;
-  height: 64px;
-  line-height: 64px;
-  background-color: #4096ff;
-  position: fixed;
-  width: 100%;
-  z-index: 1000;
-  padding: 0 40px;
-  
-  @media (max-width: 800px) {
-    padding:0  10px;
-  }
-`;
-
 const SLogo = styled(LogoIcon)``;
 const HeaderContent = styled(Flex)`
   width: 100%;
-`;
-
-const SFooter = styled(Layout.Footer)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: #fff;
-  height: 64px;
-  background-color: #4096ff;
-  position: fixed;
-  padding: 10px;
-  bottom: 0;
-  width: 100%;
-  z-index: 1000;
 `;
 
 const SContent = styled(Layout.Content)`

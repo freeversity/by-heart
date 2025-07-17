@@ -13,20 +13,21 @@ export const Timer: FC<{
 
   const isDocVisible = useBrowserTabActive();
 
-  const pauseTimer = useRefCallback(() => {
-    const now = Date.now();
-
+  const pauseTimer = useRefCallback((now: number = Date.now()) => {
     onPause?.(start, now);
     setTimeRanges((ranges) => [...ranges, [start, now]]);
-    setStart(now);
-    setNow(now);
+    setStart(Date.now());
+    setNow(Date.now());
   });
 
   useEffect(() => {
-    window.addEventListener('beforeunload', pauseTimer);
+    const onUnload = () => {
+      pauseTimer();
+    };
+    window.addEventListener('beforeunload', onUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', pauseTimer);
+      window.removeEventListener('beforeunload', onUnload);
     };
   }, [pauseTimer]);
 
@@ -47,7 +48,7 @@ export const Timer: FC<{
         }
 
         setTimeout(() => {
-          pauseTimer();
+          pauseTimer(prevNow);
         }, 0);
 
         return prevNow;
