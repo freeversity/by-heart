@@ -225,9 +225,9 @@ export const DurationChart: FC<{
 
           ticks: {
             callback: (value) => {
-              const { h, m, s } = formatDuration(+value);
+              const { h, m } = formatDuration(+value);
 
-              return `${h}:${m}:${s}`;
+              return `${h}:${m}`;
             },
           },
         },
