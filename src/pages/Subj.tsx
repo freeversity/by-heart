@@ -1,5 +1,6 @@
 import { styled } from '@linaria/react';
-import { Flex, List, Skeleton, Typography } from 'antd';
+import { Flex, List, Skeleton } from 'antd';
+import Card from 'antd/es/card/Card';
 import { useAtom } from 'jotai';
 import { Paginator } from 'primereact/paginator';
 import { Panel } from 'primereact/panel';
@@ -7,14 +8,20 @@ import { type FC, Suspense } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router';
 import { DefsPages } from '../components/DefsPages/DefsPages';
 import { PageLayout } from '../components/PageLayout';
+import { Colors } from '../consts/colors';
 import { useSubj } from '../hooks/useSubj';
+import { Container } from '../layout/Container';
 import { DEF_PAGE_SIZE, totalDefsCount } from '../state/definitions/atoms';
 
-const listsBySubj: Record<string, { list: string; title: string }[]> = {
+const listsBySubj: Record<
+  string,
+  { list: string; title: string; description: string }[]
+> = {
   fr: [
     {
       list: 'fr_50k',
       title: 'French 50k',
+      description: '50K Most used French words',
     },
   ],
 };
@@ -33,46 +40,51 @@ export const Subj: FC = () => {
 
   return (
     <PageLayout>
-      <Typography.Title>French</Typography.Title>
-      <Typography.Title level={2}>Lists</Typography.Title>
-      <List>
-        {listsBySubj[subj].map(({ list, title }) => (
-          <List.Item key={list}>
-            <Typography.Text title="2">
-              <Link to={`/subjs/${subj}/lists/${list}`}>{title}</Link>
-            </Typography.Text>
-          </List.Item>
-        ))}
-      </List>
-      <Panel
-        header={'Definitions'}
-        footer={
-          <PagesControl
-            first={(page - 1) * DEF_PAGE_SIZE}
-            rows={DEF_PAGE_SIZE}
-            totalRecords={totalPages}
-            // ={page}
-            onPageChange={({ page }) => {
-              const params = new URLSearchParams([['page', `${page + 1}`]]);
+      <Content>
+        <h1>French</h1>
+        <Panel header={'Lists'}>
+          <List>
+            {listsBySubj[subj].map(({ list, title, description }) => (
+              <ListCard className="p-button font-bold" key={list} title={title}>
+                <p>📝 {description}</p>
 
-              setParams(params);
-            }}
-          />
-        }
-      >
-        <Suspense
-          fallback={
-            <Flex wrap="wrap" gap="5px 15px">
-              {new Array(DEF_PAGE_SIZE).fill(null).map((_item, index) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: no sorting
-                <DefSkeleton key={index} />
-              ))}
-            </Flex>
+                <Link className="" to={`/subjs/${subj}/lists/${list}`}>
+                  Let's go!
+                </Link>
+              </ListCard>
+            ))}
+          </List>
+        </Panel>
+        <Panel
+          header={'Definitions'}
+          footer={
+            <Paginator
+              first={(page - 1) * DEF_PAGE_SIZE}
+              rows={DEF_PAGE_SIZE}
+              totalRecords={totalPages}
+              // ={page}
+              onPageChange={({ page }) => {
+                const params = new URLSearchParams([['page', `${page + 1}`]]);
+
+                setParams(params);
+              }}
+            />
           }
         >
-          <DefsPages />
-        </Suspense>
-      </Panel>
+          <Suspense
+            fallback={
+              <Flex wrap="wrap" gap="5px 15px">
+                {new Array(DEF_PAGE_SIZE).fill(null).map((_item, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no sorting
+                  <DefSkeleton key={index} />
+                ))}
+              </Flex>
+            }
+          >
+            <DefsPages />
+          </Suspense>
+        </Panel>
+      </Content>
     </PageLayout>
   );
 };
@@ -83,5 +95,22 @@ export const DefSkeleton = styled(Skeleton.Button)`
   width: 120px;
 `;
 
-export const PagesControl = styled(Paginator)`
+export const Content = styled(Container)`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 100px;
+`;
+
+export const ListCard = styled(Card)`
+  .ant-card-head {
+    background-color: ${Colors.blue[5]};
+    color: ${Colors.neutral[0]}
+  }
+
+  &:hover {
+    .ant-card-body {
+      text-decoration: underline;
+    }
+  }
 `;

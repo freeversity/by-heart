@@ -66,7 +66,7 @@ export const LemmaLabel: FC<{
 };
 
 const Lemma = styled.span`
-    color: ${Colors.greys[2]};
+    color: ${Colors.gray[2]};
 `;
 
 const CloseDrawerButton = styled(Button)`

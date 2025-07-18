@@ -3,8 +3,9 @@ import {
   PlayCircleFilled,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { Tag } from 'antd';
+import { styled } from '@linaria/react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Tag } from 'primereact/tag';
 import { type FC, useMemo } from 'react';
 import { Colors } from '../../consts/colors';
 import { db } from '../../db';
@@ -15,17 +16,27 @@ export const SubjShortStats: FC<{
   subj: string;
   mode?: string;
   list?: string[];
-}> = ({ subj, mode = 'forward', list, className }) => {
-  const listSet = useMemo(() => list && new Set(list), [list]);
+  timestamp?: number;
+}> = ({
+  subj,
+  mode = 'forward',
+  list,
+  className,
+  timestamp = Number.NEGATIVE_INFINITY,
+}) => {
   const statuses = useLiveQuery(() => {
-    const req = db.statuses.where({ subj, mode });
+    const listSet = list && new Set(list);
+
+    const req = db.statuses
+      .where({ subj, mode })
+      .and((status) => status.timestamp > timestamp);
 
     if (listSet) {
       req.and(({ term }) => listSet?.has(term));
     }
 
     return req.toArray();
-  });
+  }, [timestamp, subj, mode, list]);
 
   const stats = useMemo(
     () =>
@@ -61,20 +72,67 @@ export const SubjShortStats: FC<{
   }
 
   return (
-    <div className={className}>
-      <Tag color={Colors.neutral[7]}>{modeIcon}</Tag>
-      <Tag color={Colors.mastered} icon={'🤓'}>
-        {' '}
-        {stats[Status.Mastered] ?? '...'}
-      </Tag>
-      <Tag color={Colors.awared} icon={'🤔'}>
-        {' '}
-        {stats[Status.Awared] ?? '...'}
-      </Tag>
-      <Tag color={Colors.unknown} icon={'🙈'}>
-        {' '}
-        {stats[Status.Unknown] ?? '...'}
-      </Tag>
-    </div>
+    <Panel className={className}>
+      <ModeTag color={Colors.neutral[8]}>{modeIcon}</ModeTag>
+      <STermTag data-status={'mastered'}>
+        <span>🤓</span>
+        <span>{stats[Status.Mastered] ?? '...'}</span>
+      </STermTag>
+      <STermTag data-status={'awared'}>
+        <span>🤔</span>
+        <span>{stats[Status.Awared] ?? '...'}</span>
+      </STermTag>
+      <STermTag data-status={'unknown'}>
+        <span>🙈</span>
+        <span>{stats[Status.Unknown] ?? '...'}</span>
+      </STermTag>
+    </Panel>
   );
 };
+
+const Panel = styled.div`
+  justify-content: center;
+  display: flex;
+  gap: 5px;
+`;
+
+const ModeTag = styled(Tag)`
+    background-color: ${Colors.neutral[8]};
+`;
+
+export const STermTag = styled(Tag)`
+    position: relative;
+    padding: 2px 10px;
+    text-decoration: inherit;
+    background-color: ${Colors.neutral[1]};
+
+    & > span {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    
+    &[data-status='new'] {
+        font-weight: bold;
+        color: ${Colors.neutral[9]};
+        outline: 1px dashed ${Colors.neutral[6]};
+    }
+
+    &[data-status='excluded'] {
+        text-decoration: overline;
+        font-weight: normal;
+        background-color: ${Colors.excluded};
+    }
+
+    &[data-status='mastered'] {
+        background-color: ${Colors.mastered};
+    }
+
+    &[data-status='awared'] {
+        background-color: ${Colors.awared};
+    }
+
+    &[data-status='unknown'] {
+        background-color: ${Colors.unknown};
+    }
+`;

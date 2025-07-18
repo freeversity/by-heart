@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 import { Layout } from 'antd';
 import type { FC, ReactNode } from 'react';
+import { Colors } from '../../consts/colors';
 import { useViewport } from '../../hooks/useViewport';
 
 export const Footer: FC<{ className?: string; children: ReactNode }> = ({
@@ -26,7 +27,7 @@ const SFooter = styled(Layout.Footer)`
   text-align: center;
   color: #fff;
   height: 64px;
-  background-color: #4096ff;
+  background-color: ${Colors.primary};
   position: fixed;
   padding: 10px;
   top: 100%;

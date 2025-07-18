@@ -1,4 +1,5 @@
 import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primeicons/primeicons.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -13,6 +14,5 @@ if (!root) throw new Error('No root elem found!');
 createRoot(root).render(
   <StrictMode>
     <App />
-    <div />
   </StrictMode>,
 );

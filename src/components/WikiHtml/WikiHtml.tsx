@@ -73,7 +73,6 @@ const SArticle = styled.article`
     }    
 
     td, th {
-        border: 1px solid ${Colors.greys[0]};
-
+      border: 1px solid ${Colors.gray[0]};
     }
 `;

@@ -1,6 +1,7 @@
 import { styled } from '@linaria/react';
 import { Layout } from 'antd';
 import type { FC, ReactNode } from 'react';
+import { Colors } from '../../consts/colors';
 import { useViewport } from '../../hooks/useViewport';
 
 export const Header: FC<{ className?: string; children: ReactNode }> = ({
@@ -27,7 +28,7 @@ const SHeader = styled(Layout.Header)`
   color: #fff;
   height: 64px;
   line-height: 64px;
-  background-color: #4096ff;
+  background-color: ${Colors.primary};
   position: fixed;
   top: 0;
   top: var(--viewport-top);

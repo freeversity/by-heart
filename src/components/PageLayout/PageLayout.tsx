@@ -27,6 +27,7 @@ export const PageLayout: FC<{
           {subj && <Search subj={subj} />}
         </HeaderContent>
       </Header>
+
       <SContent>{children}</SContent>
       {footer && <Footer>{footer}</Footer>}
     </Layout>
