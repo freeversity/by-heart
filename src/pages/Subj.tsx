@@ -1,7 +1,8 @@
 import { styled } from '@linaria/react';
 import { Flex, List, Skeleton } from 'antd';
-import Card from 'antd/es/card/Card';
 import { useAtom } from 'jotai';
+import { Card } from 'primereact/card';
+import { Divider } from 'primereact/divider';
 import { Paginator } from 'primereact/paginator';
 import { Panel } from 'primereact/panel';
 import { type FC, Suspense } from 'react';
@@ -43,17 +44,17 @@ export const Subj: FC = () => {
       <Content>
         <h1>French</h1>
         <Panel header={'Lists'}>
-          <List>
-            {listsBySubj[subj].map(({ list, title, description }) => (
-              <ListCard className="p-button font-bold" key={list} title={title}>
-                <p>📝 {description}</p>
-
-                <Link className="" to={`/subjs/${subj}/lists/${list}`}>
-                  Let's go!
-                </Link>
-              </ListCard>
-            ))}
-          </List>
+          {listsBySubj[subj].map(({ list, title, description }) => (
+            <ListCard key={list} title={title}>
+              <p>📝 {description}</p>
+              <Link
+                className="p-button font-bold"
+                to={`/subjs/${subj}/lists/${list}`}
+              >
+                Let's go!
+              </Link>
+            </ListCard>
+          ))}
         </Panel>
         <Panel
           header={'Definitions'}
@@ -103,14 +104,5 @@ export const Content = styled(Container)`
 `;
 
 export const ListCard = styled(Card)`
-  .ant-card-head {
-    background-color: ${Colors.blue[5]};
-    color: ${Colors.neutral[0]}
-  }
 
-  &:hover {
-    .ant-card-body {
-      text-decoration: underline;
-    }
-  }
 `;

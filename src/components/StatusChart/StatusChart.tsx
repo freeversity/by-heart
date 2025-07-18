@@ -112,6 +112,7 @@ export const StatusChart: FC<{
             .getComputedStyle(document.body)
             .getPropertyValue('--yellow-500'),
           fill: true,
+          pointRadius: 0,
         },
         {
           label: 'Awared',
@@ -125,6 +126,7 @@ export const StatusChart: FC<{
             .getComputedStyle(document.body)
             .getPropertyValue('--blue-400'),
           fill: true,
+          pointRadius: 0,
         },
         {
           label: 'Mastered',
@@ -138,6 +140,7 @@ export const StatusChart: FC<{
             .getComputedStyle(document.body)
             .getPropertyValue('--green-700'),
           fill: true,
+          pointRadius: 0,
         },
       ],
     }),

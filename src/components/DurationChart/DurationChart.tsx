@@ -163,6 +163,7 @@ export const DurationChart: FC<{
             .getPropertyValue('--yellow-500'),
           fill: true,
           yAxisID: 'y1',
+          pointRadius: 0,
         },
         {
           label: 'Awared',
@@ -177,6 +178,7 @@ export const DurationChart: FC<{
             .getPropertyValue('--blue-400'),
           fill: true,
           yAxisID: 'y1',
+          pointRadius: 0,
         },
         {
           label: 'Mastered',
@@ -191,6 +193,7 @@ export const DurationChart: FC<{
             .getPropertyValue('--green-700'),
           fill: true,
           yAxisID: 'y1',
+          pointRadius: 0,
         },
       ],
     }),
@@ -240,8 +243,6 @@ export const DurationChart: FC<{
     }),
     [monthDates],
   );
-
-  if (!timeRanges) return null;
 
   return (
     <Container className={className}>
