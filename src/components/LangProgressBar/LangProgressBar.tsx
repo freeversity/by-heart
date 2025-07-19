@@ -85,6 +85,7 @@ const Labels = styled.ul`
     margin: 10px 0 0;
     padding: 0;
     position: relative;
+    height: 20px;
 `;
 
 const Label = styled.li`

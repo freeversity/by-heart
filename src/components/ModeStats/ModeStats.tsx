@@ -112,6 +112,12 @@ export const ModeStats: FC<{
 
       <SubjShortStats subj={subj} list={list} mode={mode} />
 
+      <TimeStats>
+        {!!totalDuration.h && <span>{totalDuration.h}:</span>}
+        <span>{totalDuration.m}:</span>
+        <span>{totalDuration.s}</span>
+      </TimeStats>
+
       <FullProgress
         stats={lemmasStats}
         targets={[
@@ -122,11 +128,6 @@ export const ModeStats: FC<{
           { label: 'C1', value: 8000 },
         ]}
       />
-      <TimeStats>
-        {!!totalDuration.h && <span>{totalDuration.h}:</span>}
-        <span>{totalDuration.m}:</span>
-        <span>{totalDuration.s}</span>
-      </TimeStats>
 
       <Divider />
       <ChartsWrapper>
@@ -163,5 +164,5 @@ const ChartsWrapper = styled.div`
 
 const FullProgress = styled(LangProgressBar)`
   width:100%;
-  margin: 0 0 10px;
+  margin: 10 0 10px;
 `;
