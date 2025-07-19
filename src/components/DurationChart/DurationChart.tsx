@@ -214,6 +214,7 @@ export const DurationChart: FC<{
           max: monthDates.at(-1),
           ticks: {
             stepSize: 1000 * 60 * 60 * 24,
+
             callback: (value) => {
               return dayjs(monthDates[+value]).format('DD MMM');
             },

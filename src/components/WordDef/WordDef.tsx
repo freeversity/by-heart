@@ -128,7 +128,7 @@ const IpaItem = styled.li`
     margin-left: 8px;
     display: inline-block;
     content: '•';
-    color: ${Colors.gray[0]};
+    color: ${Colors.gray[4]};
   }
 `;
 

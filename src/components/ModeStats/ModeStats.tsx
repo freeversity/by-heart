@@ -3,10 +3,15 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Divider } from 'primereact/divider';
 import { type FC, useMemo } from 'react';
 import { db } from '../../db';
+import { Status } from '../../db/db';
 import { formatDuration } from '../../utils/formatDuration';
 import { DurationChart } from '../DurationChart';
 import { StatusChart } from '../StatusChart';
 import { SubjShortStats } from '../SubjShortStats';
+
+import { values } from 'lodash';
+import { MeterGroup } from 'primereact/metergroup';
+import { LangProgressBar } from '../LangProgressBar';
 
 export const ModeStats: FC<{
   mode: string;
@@ -48,6 +53,48 @@ export const ModeStats: FC<{
     [timeRanges, today],
   );
 
+  const lemmas = useLiveQuery(
+    () =>
+      db.statuses
+        .where({ subj, mode })
+        .and(({ lemma }) => !lemma)
+        .toArray(),
+    [subj, mode],
+  );
+
+  const lemmasStats = useMemo(() => {
+    const aggrData = lemmas?.reduce(
+      (stats, { term, status }) => {
+        if (status === Status.Excluded) return stats;
+
+        stats[status].add(term);
+
+        return stats;
+      },
+      {
+        [Status.Mastered]: new Set<string>(),
+        [Status.Awared]: new Set<string>(),
+        [Status.Unknown]: new Set<string>(),
+      },
+    ) ?? {
+      [Status.Mastered]: new Set<string>(),
+      [Status.Awared]: new Set<string>(),
+      [Status.Unknown]: new Set<string>(),
+    };
+
+    return {
+      [Status.Mastered]: aggrData[Status.Mastered].size,
+      [Status.Awared]: [...aggrData[Status.Awared]].filter(
+        (lemma) => !aggrData[Status.Mastered].has(lemma),
+      ).length,
+      [Status.Unknown]: [...aggrData[Status.Unknown]].filter(
+        (lemma) =>
+          !aggrData[Status.Mastered].has(lemma) &&
+          !aggrData[Status.Awared].has(lemma),
+      ).length,
+    };
+  }, [lemmas]);
+
   return (
     <div>
       <h2>Today</h2>
@@ -64,6 +111,17 @@ export const ModeStats: FC<{
       <h2>Total</h2>
 
       <SubjShortStats subj={subj} list={list} mode={mode} />
+
+      <FullProgress
+        stats={lemmasStats}
+        targets={[
+          { label: 'A1', value: 1000 },
+          { label: 'A2', value: 1500 },
+          { label: 'B1', value: 3000 },
+          { label: 'B2', value: 4000 },
+          { label: 'C1', value: 8000 },
+        ]}
+      />
       <TimeStats>
         {!!totalDuration.h && <span>{totalDuration.h}:</span>}
         <span>{totalDuration.m}:</span>
@@ -101,4 +159,9 @@ const ChartsWrapper = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+`;
+
+const FullProgress = styled(LangProgressBar)`
+  width:100%;
+  margin: 0 0 10px;
 `;

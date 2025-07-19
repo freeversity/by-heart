@@ -1,27 +1,19 @@
-import {
-  EditOutlined,
-  PlayCircleFilled,
-  ReloadOutlined,
-} from '@ant-design/icons';
 import { styled } from '@linaria/react';
-import { Button, Flex, Pagination, Typography } from 'antd';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { Flex } from 'antd';
 import { useAtom } from 'jotai';
 import { Paginator } from 'primereact/paginator';
 import { Panel } from 'primereact/panel';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { type FC, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { ModeStats } from '../components/ModeStats';
 import { PageLayout } from '../components/PageLayout';
-import { SubjShortStats } from '../components/SubjShortStats';
 import { TermLink } from '../components/TermLink/TermLink';
-import { db } from '../db';
+
 import { useListId, useSubj } from '../hooks/useSubj';
 import { Container } from '../layout/Container';
 import { currentListAtom } from '../state/currentList/atoms';
 import { DEF_PAGE_SIZE } from '../state/definitions/atoms';
-import { formatDuration } from '../utils/formatDuration';
 
 const listsTitles: Record<string, string> = {
   fr_50k: 'French 50K',

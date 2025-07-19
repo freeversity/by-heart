@@ -7,6 +7,7 @@ import { getNextForward } from '../../api/game';
 import { db } from '../../db';
 import { useRefCallback } from '../../hooks/useRefCallback';
 import { useListId, useSubj } from '../../hooks/useSubj';
+import { Container } from '../../layout/Container';
 import { currentListAtom } from '../../state/currentList/atoms';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FlashCard } from '../FlashCard';
@@ -194,7 +195,9 @@ export const ForwardGame: FC = () => {
         >
           <ErrorBoundary>
             <Suspense>
-              <FullInfoCard term={def.term} mode={mode} subj={subj} />
+              <Container>
+                <FullInfoCard term={def.term} mode={mode} subj={subj} />
+              </Container>
             </Suspense>
           </ErrorBoundary>
 

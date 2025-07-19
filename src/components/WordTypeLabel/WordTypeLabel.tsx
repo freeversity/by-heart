@@ -27,7 +27,7 @@ export const WordTypeLabel: FC<{
 
 const FormLabel = styled.span`
   text-align: left;
-  color: ${Colors.gray[2]};
+  color: ${Colors.gray[5]};
   font-size: 0.9em;
   font-weight: 400;
   font-style: italic;

@@ -1,5 +1,5 @@
 import { styled } from '@linaria/react';
-import { Card, List, Typography } from 'antd';
+import { Card } from 'primereact/card';
 import type { FC } from 'react';
 import { FrMod, FrTense, type WordConjugation } from '../../api/defs';
 
@@ -46,16 +46,16 @@ export const Conjugation: FC<{
     <div className={className}>
       {conj.map(({ mod, tenses }) => (
         <section key={mod}>
-          <Typography.Title level={4}>{modLabel[mod]}</Typography.Title>
+          <CardHeading>{modLabel[mod]}</CardHeading>
           <Mod>
             {tenses.map(({ tense, forms }) => (
               <ConjCard key={tense} title={tenseLabel[tense]}>
-                <List>
+                <ConjList>
                   {forms.map((row, index) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: no sorting
-                    <ConjListItem key={index}>{row.join('')}</ConjListItem>
+                    <ConjItem key={index}>{row.join('')}</ConjItem>
                   ))}
-                </List>
+                </ConjList>
               </ConjCard>
             ))}
           </Mod>
@@ -76,11 +76,26 @@ const ConjCard = styled(Card)`
   flex-grow: 1;
   min-width: 200px;
 
+  .p-card-title {
+    font-size: 18px;
+    flex-wrap: nowrap;
+  }
+
   .ant-card-body {
     padding: 5px 12px;
   }
 `;
 
-const ConjListItem = styled(List.Item)`
-    padding: 5px 0 !important;
+const CardHeading = styled.h4`
+  font-size: 20px;  
+`;
+
+const ConjList = styled.ul`
+  padding: 0;
+  margin: 0;
+  list-style: none;
+`;
+
+const ConjItem = styled.li`
+  line-height: 1.8;
 `;

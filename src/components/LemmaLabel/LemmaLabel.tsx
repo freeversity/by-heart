@@ -27,7 +27,7 @@ export const LemmaLabel: FC<{
       >
         <InfoOutlined />
       </Button>
-      <Modal
+      <LemmaModal
         closable={false}
         okText={null}
         open={isOpen}
@@ -60,16 +60,21 @@ export const LemmaLabel: FC<{
             />
           </Suspense>
         </ErrorBoundary>
-      </Modal>
+      </LemmaModal>
     </>
   );
 };
 
 const Lemma = styled.span`
-    color: ${Colors.gray[2]};
+    color: ${Colors.gray[6]};
 `;
 
 const CloseDrawerButton = styled(Button)`
     margin-top: 20px;
     bottom: 10px;
+`;
+
+const LemmaModal = styled(Modal)`
+  width: 100%;
+  max-width: 900px;
 `;

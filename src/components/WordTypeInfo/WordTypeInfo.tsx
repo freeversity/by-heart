@@ -117,7 +117,7 @@ const TypeHeading = styled.h3`
 `;
 
 const FormOfLabel = styled.span`
-  color: ${Colors.gray[0]};
+  color: ${Colors.gray[4]};
   font-weight: normal;
   font-style: italic;
 `;
