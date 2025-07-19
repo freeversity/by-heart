@@ -167,9 +167,7 @@ export const DurationChart: FC<{
         },
         {
           label: 'Awared',
-          data: Object.values(monthEventsByDay).map(
-            ({ awared, unknown }) => awared + unknown,
-          ),
+          data: Object.values(monthEventsByDay).map(({ awared }) => awared),
           borderColor: window
             .getComputedStyle(document.body)
             .getPropertyValue('--blue-400'),
@@ -182,9 +180,7 @@ export const DurationChart: FC<{
         },
         {
           label: 'Mastered',
-          data: Object.values(monthEventsByDay).map(
-            ({ mastered, unknown, awared }) => mastered + unknown + awared,
-          ),
+          data: Object.values(monthEventsByDay).map(({ mastered }) => mastered),
           borderColor: window
             .getComputedStyle(document.body)
             .getPropertyValue('--green-700'),
