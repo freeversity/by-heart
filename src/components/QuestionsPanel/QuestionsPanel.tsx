@@ -1,9 +1,10 @@
 import { styled } from '@linaria/react';
+import { Divider } from 'primereact/divider';
 import type { FC } from 'react';
 import type { Question } from '../../api/tests';
 import { Colors } from '../../consts/colors';
 import { Countdown } from '../Countdown/Countdown';
-import { Timer } from '../Timer/Timer';
+import { TestResult } from '../TestResult/TestResult';
 
 export const QuestionsPanel: FC<{
   answers?: { [index: number]: boolean };
@@ -24,7 +25,13 @@ export const QuestionsPanel: FC<{
 }) => {
   return (
     <>
-      {grade !== undefined && `Grade: ${grade}`}
+      {grade !== undefined && (
+        <>
+          <TestResult grade={grade} />
+          <Divider />
+        </>
+      )}
+
       <QuestionsNav className={className}>
         {questions.map((q, index) => (
           <QuestionsNavItem
@@ -45,7 +52,7 @@ export const QuestionsPanel: FC<{
           </QuestionsNavItem>
         ))}
       </QuestionsNav>
-      <Countdown timeout={timeout * 1000} />
+      {grade === undefined && <Countdown timeout={timeout * 1000} />}
     </>
   );
 };

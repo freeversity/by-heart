@@ -40,18 +40,21 @@ export const QuestionAudio: FC<{
         )}
       </audio>
       {subPath && subsOpen && (
-        <Subtitles>
-          <FullSubBtn
-            size="small"
-            className={`pi ${fullSubs ? 'pi-chevron-down' : 'pi-chevron-up'}`}
-            onClick={() => {
-              setSubsFull((show) => !show);
-            }}
-            severity="secondary"
-            rounded
-          />
-          <pre>{fullSubs ? subs : cueText}</pre>
-        </Subtitles>
+        <div>
+          Subtitles:
+          <Subtitles>
+            <FullSubBtn
+              size="small"
+              className={`pi ${fullSubs ? 'pi-chevron-down' : 'pi-chevron-up'}`}
+              onClick={() => {
+                setSubsFull((show) => !show);
+              }}
+              severity="secondary"
+              rounded
+            />
+            <pre>{fullSubs ? subs : cueText}</pre>
+          </Subtitles>
+        </div>
       )}
     </div>
   );

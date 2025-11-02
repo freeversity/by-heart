@@ -1,12 +1,15 @@
 import { styled } from '@linaria/react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { Button } from 'primereact/button';
 import { type FC, Fragment, useState } from 'react';
 import Markdown from 'react-markdown';
 import remark from 'remark-gfm';
 import type { Question } from '../../api/tests';
 import { Colors } from '../../consts/colors';
-import { currentTestTextAtom } from '../../state/currentTest/atoms';
+import {
+  currentTestQuestionAtom,
+  currentTestTextAtom,
+} from '../../state/currentTest/atoms';
 import { QuestionAudio } from '../QuestionAudio/QuestionAudio';
 
 export const QuestionPanel: FC<{
@@ -30,10 +33,18 @@ export const QuestionPanel: FC<{
   onFinish,
   correctAnswer,
 }) => {
-  const [qText] = useAtom(currentTestTextAtom({ index: qIndex, id: testId }));
+  const qText = useAtomValue(
+    currentTestTextAtom({ index: qIndex, id: testId }),
+  );
+
+  const { points } =
+    useAtomValue(currentTestQuestionAtom({ index: qIndex, id: testId })) ?? {};
 
   return (
     <div>
+      <Heading>
+        Question #{qIndex} ({points} points)
+      </Heading>
       {question?.images?.map((imgUrl, index) => (
         <Img
           // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -52,7 +63,7 @@ export const QuestionPanel: FC<{
           src={`https://cdn.freeversity.io/tests/${testId}/${src}`}
           subPath={`https://cdn.freeversity.io/tests/${testId}/${question.text}`}
           subs={qText}
-          subsOpen={false}
+          subsOpen={correctAnswer !== undefined}
         />
       ))}
       <Answers>
@@ -89,6 +100,10 @@ export const QuestionPanel: FC<{
     </div>
   );
 };
+
+const Heading = styled.h2`
+  font-size: 18px;
+`;
 
 const Img = styled.img`
   max-width: 100%;
