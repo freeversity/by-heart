@@ -6,7 +6,9 @@ import { formatDuration } from '../../utils/formatDuration';
 export const Timer: FC<{
   className?: string;
   onPause?: (start: number, end: number) => void;
-}> = ({ className, onPause }) => {
+  timeout?: number;
+  onTimeout?: () => void;
+}> = ({ className, onPause, timeout }) => {
   const [ranges, setTimeRanges] = useState<[number, number][]>([]);
   const [start, setStart] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
@@ -70,12 +72,20 @@ export const Timer: FC<{
     start;
 
   const { h, m, s } = formatDuration(delta);
+  const formattedTimeout = timeout && formatDuration(timeout);
 
   return (
     <div className={className}>
       {!!h && <span>{h}:</span>}
       <span>{m}:</span>
       <span>{s}</span>
+      {!!formattedTimeout && (
+        <>
+          /{!!formattedTimeout.h && <span>{formattedTimeout.h}:</span>}
+          <span>{formattedTimeout.m}:</span>
+          <span>{formattedTimeout.s}</span>
+        </>
+      )}
     </div>
   );
 };

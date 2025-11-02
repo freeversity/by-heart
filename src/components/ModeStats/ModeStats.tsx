@@ -9,8 +9,6 @@ import { DurationChart } from '../DurationChart';
 import { StatusChart } from '../StatusChart';
 import { SubjShortStats } from '../SubjShortStats';
 
-import { values } from 'lodash';
-import { MeterGroup } from 'primereact/metergroup';
 import { LangProgressBar } from '../LangProgressBar';
 
 export const ModeStats: FC<{
@@ -139,30 +137,30 @@ export const ModeStats: FC<{
 };
 
 const TimeStats = styled.div`
-    margin: 10px 0;
+  margin: 10px 0;
 `;
 
 const DurChart = styled(DurationChart)`
-    height: 300px;
-    width: 0;
-    flex-grow: 1;
-    min-width: 300px;
+  height: 300px;
+  width: 0;
+  flex-grow: 1;
+  min-width: 300px;
 `;
 
 const StatChart = styled(StatusChart)`
-    height: 300px;
-    width: 0;
-    flex-grow: 1;
-    min-width: 300px;
+  height: 300px;
+  width: 0;
+  flex-grow: 1;
+  min-width: 300px;
 `;
 
 const ChartsWrapper = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 `;
 
 const FullProgress = styled(LangProgressBar)`
-  width:100%;
+  width: 100%;
   margin: 10 0 10px;
 `;

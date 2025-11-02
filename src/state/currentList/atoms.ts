@@ -10,7 +10,35 @@ export const currentListAtom = atomFamily(
 );
 
 export const currentListDef = atomFamily(
-  (_params: { subj: string; id: string; mode: string }) =>
-    atom<string | null>(null),
+  ({ subj, id }: { subj: string; id: string }) =>
+    atom(async (get) => {
+      const list = await get(currentListAtom({ subj, id }));
+
+      return list.filter((item) => typeof item === 'string');
+    }),
+  isEqual,
+);
+
+export const currentListeningTests = atomFamily(
+  ({ subj, id }: { subj: string; id: string }) =>
+    atom(async (get) => {
+      const list = await get(currentListAtom({ subj, id }));
+
+      return list.filter(
+        (item) => typeof item !== 'string' && item.type === 'listening',
+      );
+    }),
+  isEqual,
+);
+
+export const currentReadingTests = atomFamily(
+  ({ subj, id }: { subj: string; id: string }) =>
+    atom(async (get) => {
+      const list = await get(currentListAtom({ subj, id }));
+
+      return list.filter(
+        (item) => typeof item !== 'string' && item.type === 'reading',
+      );
+    }),
   isEqual,
 );

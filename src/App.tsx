@@ -7,6 +7,8 @@ import { DefList } from './pages/DefList';
 import { DefListPlay } from './pages/DefListPlay';
 import { Definition } from './pages/Definition';
 import { Home } from './pages/Home';
+import { ListeningTest } from './pages/ListeningTest';
+import { ReadingTest } from './pages/ReadingTest';
 import { Subj } from './pages/Subj';
 import { Subjs } from './pages/Subjs';
 
@@ -27,7 +29,16 @@ function App() {
               path="/subjs/:subj/lists/:listId/play/*"
               element={<DefListPlay />}
             />
+            <Route
+              path="/subjs/:subj/lists/:listId/listening/:testId"
+              element={<ListeningTest />}
+            />
+            <Route
+              path="/subjs/:subj/lists/:listId/reading/:testId"
+              element={<ReadingTest />}
+            />
             <Route path="/subjs/:subj/lists/:listId" element={<DefList />} />
+
             <Route path="/subjs/:subj" element={<Subj />} />
             <Route path="/subjs" element={<Subjs />} />
             <Route path="/" element={<Home />} />

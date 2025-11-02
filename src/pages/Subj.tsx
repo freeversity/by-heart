@@ -24,6 +24,11 @@ const listsBySubj: Record<
       title: 'French 50k',
       description: '50K Most used French words',
     },
+    // {
+    //   list: 'tcf',
+    //   title: 'TCF Tests',
+    //   description: 'TCF tests for practice',
+    // },
   ],
 };
 
@@ -43,7 +48,7 @@ export const Subj: FC = () => {
     <PageLayout>
       <Content>
         <h1>French</h1>
-        <Panel header={'Lists'}>
+        <SubjList header={'Lists'}>
           {listsBySubj[subj].map(({ list, title, description }) => (
             <ListCard key={list} title={title}>
               <p>📝 {description}</p>
@@ -55,7 +60,7 @@ export const Subj: FC = () => {
               </Link>
             </ListCard>
           ))}
-        </Panel>
+        </SubjList>
         <Panel
           header={'Definitions'}
           footer={
@@ -90,6 +95,14 @@ export const Subj: FC = () => {
   );
 };
 
+export const SubjList = styled(Panel)`
+  .p-panel-content {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+`;
+
 export const DefSkeleton = styled(Skeleton.Button)`
   display: inline-block;
   height: 1.2em !important;
@@ -104,5 +117,7 @@ export const Content = styled(Container)`
 `;
 
 export const ListCard = styled(Card)`
-
+  width: 0;
+  flex-grow: 1;
+  min-width: 400px;
 `;
