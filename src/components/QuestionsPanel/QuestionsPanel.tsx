@@ -40,14 +40,14 @@ export const QuestionsPanel: FC<{
       <QuestionsNav className={className}>
         {questions?.map((_q, index) => (
           <QuestionsNavItem
-            data-active={qIndex === index + 1}
-            data-status={`${index + 1}` in aswers ? 'answered' : undefined}
             // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={index}
           >
             <QuestionsNavButton
+              data-active={qIndex === index + 1}
               data-correct={!!answers && answers[index + 1]}
               data-incorrect={!!answers && !answers[index + 1]}
+              data-status={`${index + 1}` in aswers ? 'answered' : undefined}
               onClick={() => {
                 setQIndex(`${index + 1}`);
               }}
@@ -92,11 +92,11 @@ const QuestionsNavButton = styled.button`
   font-size: 13px;
   cursor: pointer;
 
-  [data-active="true"] & {
+  &[data-active="true"] {
     box-shadow: 0 0 0 2px ${Colors.blue[3]};
   }
 
-  [data-status="answered"] & {
+  &[data-status="answered"] {
     background-color: ${Colors.blue[1]};
   }
 
