@@ -93,7 +93,7 @@ const QuestionsNavButton = styled.button`
   cursor: pointer;
 
   [data-active="true"] & {
-    outline: 2px solid ${Colors.blue[3]};
+    box-shadow: 0 0 0 2px ${Colors.blue[3]};
   }
 
   [data-status="answered"] & {
