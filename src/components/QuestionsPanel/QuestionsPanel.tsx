@@ -1,28 +1,33 @@
 import { styled } from '@linaria/react';
+import { useAtom, useAtomValue } from 'jotai';
 import { Divider } from 'primereact/divider';
 import type { FC } from 'react';
-import type { Question } from '../../api/tests';
 import { Colors } from '../../consts/colors';
+import {
+  currentTestAnswersAtom,
+  currentTestAtom,
+  currentTestGradeAtom,
+  currentTestResult,
+  questionIndexAtom,
+} from '../../state/currentTest/atoms';
 import { Countdown } from '../Countdown/Countdown';
 import { TestResult } from '../TestResult/TestResult';
 
 export const QuestionsPanel: FC<{
-  answers?: { [index: number]: boolean };
-  grade?: number;
   className?: string;
-  active: number;
-  onSetActive: (index: number) => void;
-  questions: (Question & { status: 'answered' | 'correct' | 'wrong' | null })[];
-  timeout: number;
-}> = ({
-  active,
-  onSetActive,
-  questions,
-  className,
-  timeout,
-  answers,
-  grade,
-}) => {
+  onTimeout: () => void;
+}> = ({ className, onTimeout }) => {
+  const grade = useAtomValue(currentTestGradeAtom);
+  const answers = useAtomValue(currentTestResult);
+
+  const [qParam, setQIndex] = useAtom(questionIndexAtom);
+
+  const qIndex = +qParam;
+
+  const { questions, timeout } = useAtomValue(currentTestAtom);
+
+  const aswers = useAtomValue(currentTestAnswersAtom);
+
   return (
     <>
       {grade !== undefined && (
@@ -33,10 +38,10 @@ export const QuestionsPanel: FC<{
       )}
 
       <QuestionsNav className={className}>
-        {questions.map((q, index) => (
+        {questions.map((_q, index) => (
           <QuestionsNavItem
-            data-active={active === index + 1}
-            data-status={q.status}
+            data-active={qIndex === index + 1}
+            data-status={`${index + 1}` in aswers ? 'answered' : undefined}
             // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={index}
           >
@@ -44,7 +49,7 @@ export const QuestionsPanel: FC<{
               data-correct={!!answers && answers[index + 1]}
               data-incorrect={!!answers && !answers[index + 1]}
               onClick={() => {
-                onSetActive(index + 1);
+                setQIndex(`${index + 1}`);
               }}
             >
               {index + 1}
@@ -52,7 +57,9 @@ export const QuestionsPanel: FC<{
           </QuestionsNavItem>
         ))}
       </QuestionsNav>
-      {grade === undefined && <Countdown timeout={timeout * 1000} />}
+      {grade === undefined && (
+        <Countdown timeout={timeout * 1000} onTimeout={onTimeout} />
+      )}
     </>
   );
 };

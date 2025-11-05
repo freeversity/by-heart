@@ -1,19 +1,22 @@
 import { styled } from '@linaria/react';
 import { useAtom, useAtomValue } from 'jotai';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
 import { Divider } from 'primereact/divider';
 import { Panel } from 'primereact/panel';
-import { type FC, Suspense } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { type FC, Suspense, useState } from 'react';
+import { flushSync } from 'react-dom';
+import { Link, useParams } from 'react-router';
 import { PageLayout } from '../components/PageLayout';
 import { QuestionPanel } from '../components/QuestionPanel/QuestionPanel';
 import { QuestionsPanel } from '../components/QuestionsPanel/QuestionsPanel';
 import {
+  currentTestAnswered,
   currentTestAnswersAtom,
   currentTestAtom,
   currentTestFinishedAtom,
-  currentTestGradeAtom,
   currentTestQuestionAtom,
-  currentTestResult,
+  questionIndexAtom,
 } from '../state/currentTest/atoms';
 
 export const ListeningTest: FC = () => {
@@ -25,24 +28,18 @@ export const ListeningTest: FC = () => {
 
   if (!testId || !subj || !listId) throw new Error('No test id');
 
-  const [searchParams, setSearchParams] = useSearchParams(
-    new URLSearchParams({ q: '1' }),
-  );
+  const [qParam, setSearchParams] = useAtom(questionIndexAtom);
 
-  const qParam = searchParams.get('q') ?? '1';
+  const [isWarningOpen, setWarningOpen] = useState(false);
 
   const qIndex = +qParam;
 
-  const [answers, setAnswers] = useAtom(currentTestAnswersAtom(testId));
-  const [isFinished, setFinished] = useAtom(currentTestFinishedAtom(testId));
-  const question = useAtomValue(
-    currentTestQuestionAtom({ id: testId, index: qIndex }),
-  );
-  const test = useAtomValue(currentTestAtom(testId));
+  const [answers, setAnswers] = useAtom(currentTestAnswersAtom);
+  const [isFinished, setFinished] = useAtom(currentTestFinishedAtom);
+  const question = useAtomValue(currentTestQuestionAtom);
+  const test = useAtomValue(currentTestAtom);
 
-  const result = useAtomValue(currentTestResult(testId));
-
-  const grade = useAtomValue(currentTestGradeAtom(testId));
+  const isAllAnswered = useAtomValue(currentTestAnswered);
 
   return (
     <PageLayout>
@@ -54,23 +51,11 @@ export const ListeningTest: FC = () => {
         </Breadcrumbs>
         <Divider />
         <QuestionsPanel
-          answers={isFinished ? result : undefined}
-          grade={isFinished ? grade : undefined}
           // answers={undefined}
           // grade={undefined}
-          timeout={test.timeout}
-          active={qIndex}
-          onSetActive={(index) => {
-            setSearchParams((params) => {
-              params.set('q', `${index}`);
-
-              return params;
-            });
+          onTimeout={() => {
+            setFinished(true);
           }}
-          questions={test.questions.map((q, index) => ({
-            ...q,
-            status: `${index + 1}` in answers ? 'answered' : null,
-          }))}
         />
         <Divider />
 
@@ -78,35 +63,24 @@ export const ListeningTest: FC = () => {
           <Suspense>
             <QuestionPanel
               testId={testId}
-              question={question}
-              index={qIndex}
               answer={answers[qIndex]}
-              correctAnswer={isFinished ? question.answer : undefined}
               onAnswer={(qIndex, answerIndex) => {
-                setAnswers((answers) => ({
+                setAnswers({
                   ...answers,
                   [qIndex]: answerIndex,
-                }));
+                });
               }}
               onNext={
                 qIndex < test.questions.length
                   ? () => {
-                      setSearchParams((params) => {
-                        params.set('q', `${qIndex + 1}`);
-
-                        return params;
-                      });
+                      setSearchParams(`${qIndex + 1}`);
                     }
                   : undefined
               }
               onPrev={
                 qIndex > 1
                   ? () => {
-                      setSearchParams((params) => {
-                        params.set('q', `${qIndex - 1}`);
-
-                        return params;
-                      });
+                      setSearchParams(`${qIndex - 1}`);
                     }
                   : undefined
               }
@@ -114,13 +88,58 @@ export const ListeningTest: FC = () => {
                 isFinished
                   ? undefined
                   : () => {
-                      setFinished(true);
+                      if (isAllAnswered) {
+                        setFinished(true);
+                      } else {
+                        setWarningOpen(true);
+                      }
+                    }
+              }
+              onRetry={
+                !isFinished
+                  ? undefined
+                  : () => {
+                      setFinished(false);
+                      setAnswers({});
+                      setSearchParams('1');
                     }
               }
             />
           </Suspense>
         )}
       </Content>
+      <Dialog
+        onHide={() => {
+          setWarningOpen(false);
+        }}
+        visible={isWarningOpen}
+        header={'Finish test?'}
+        footer={
+          <>
+            <Button
+              onClick={() => {
+                setWarningOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setWarningOpen(false);
+                flushSync(() => {
+                  setFinished(true);
+                });
+              }}
+            >
+              Finish
+            </Button>
+          </>
+        }
+      >
+        Are you sure you want to finish the test?
+        <br />
+        There are several unanswered questions left.
+      </Dialog>
     </PageLayout>
   );
 };

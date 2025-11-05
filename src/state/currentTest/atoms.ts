@@ -1,74 +1,183 @@
 import { atom } from 'jotai';
-import { atomFamily } from 'jotai/utils';
+import { atomWithCache } from 'jotai-cache';
+import { atomWithLocation, atomWithSearchParams } from 'jotai-location';
+import { atomFamily, loadable, selectAtom } from 'jotai/utils';
 import { isEqual } from 'lodash';
+import { matchPath } from 'react-router';
 import { getQuestionText, getTest } from '../../api/tests';
 
-export const currentTestAtom = atomFamily((id: string) =>
-  atom(async () => await getTest(id)),
+export const locationAtom = atomWithLocation();
+
+export const questionIndexAtom = atomWithSearchParams('q', '1');
+
+export const testAtom = atomFamily((testId: string) =>
+  atomWithCache(() => getTest(testId)),
 );
 
-export const currentTestQuestionAtom = atomFamily(
-  ({ id, index }: { id: string; index: number }) =>
+export const testQuestionAtom = atomFamily(
+  ({ testId, questionIndex }: { testId: string; questionIndex: number }) =>
     atom(async (get) => {
-      const test = await get(currentTestAtom(id));
+      const test = await get(testAtom(testId));
 
-      return test.questions[index - 1];
+      return test.questions[questionIndex - 1];
     }),
   isEqual,
 );
 
-export const currentTestTextAtom = atomFamily(
-  ({ id, index }: { id: string; index: number }) =>
-    atom(async (get) => {
-      const question = await get(currentTestQuestionAtom({ id, index }));
+export const testQuestionTextAtom = atomFamily(
+  ({ testId, questionIndex }: { testId: string; questionIndex: number }) =>
+    atomWithCache(
+      async (get) => {
+        const question = await get(testQuestionAtom({ testId, questionIndex }));
 
-      if (!question?.text) return null;
+        if (!question?.text) return null;
 
-      return getQuestionText(id, question.text);
-    }),
-  isEqual,
-);
-
-export const currentTestAnswersAtom = atomFamily((_id: string) =>
-  atom<{ [key: number]: number | undefined }>({}),
-);
-
-export const currentTestResult = atomFamily((id: string) =>
-  atom(async (get) => {
-    const isFinished = get(currentTestFinishedAtom(id));
-
-    if (!isFinished) return {};
-
-    const answers = get(currentTestAnswersAtom(id));
-
-    const { questions } = await get(currentTestAtom(id));
-
-    return Object.entries(answers).reduce<{ [index: number]: boolean }>(
-      (result, [qIndex, answer]) => {
-        result[+qIndex] = answer === questions[+qIndex - 1]?.answer;
-
-        return result;
+        return getQuestionText(testId, question.text);
       },
-      {},
-    );
-  }),
+      { size: 100 },
+    ),
+
+  isEqual,
 );
 
-export const currentTestFinishedAtom = atomFamily((_id: string) =>
+export const testAnswersAtom = atomFamily((_testId: string) =>
+  atom<{
+    [key: number]: number | undefined;
+  }>({}),
+);
+
+export const testFinishedAtom = atomFamily((_testId: string) =>
   atom<boolean>(false),
 );
 
-export const currentTestGradeAtom = atomFamily((id: string) =>
-  atom(async (get) => {
-    const result = await get(currentTestResult(id));
-    const { questions } = await get(currentTestAtom(id));
+export const currentTestIdAtom = selectAtom(locationAtom, ({ pathname }) => {
+  if (!pathname) throw new Error('Test id is not valid');
 
-    return questions.reduce((grade, q, index) => {
-      if (result[index + 1]) {
-        return grade + q.points;
-      }
+  const matchReading = matchPath(
+    '/subjs/:subj/lists/:listId/reading/:testId',
+    pathname,
+  );
+  const matchListening = matchPath(
+    '/subjs/:subj/lists/:listId/listening/:testId',
+    pathname,
+  );
 
-      return grade;
-    }, 0);
-  }),
+  const testId =
+    matchReading?.params.testId ?? matchListening?.params?.testId ?? null;
+
+  if (!testId) throw new Error('Test id is not valid');
+
+  return testId;
+});
+
+export const currentQuestionIndexAtom = selectAtom(
+  questionIndexAtom,
+  (qIndex) => {
+    if (!qIndex || Number.isNaN(+qIndex)) return 1;
+
+    return +qIndex;
+  },
 );
+
+export const currentTestAtom = atom((get) => {
+  const testId = get(currentTestIdAtom);
+
+  return get(testAtom(testId));
+});
+
+export const currentTestQuestionAtom = atom((get) => {
+  const qIndex = get(currentQuestionIndexAtom);
+  const result = get(loadable(currentTestAtom));
+
+  if (result.state !== 'hasData') return undefined;
+
+  return result.data.questions[qIndex - 1];
+});
+
+export const currentTestAnswersAtom = atom(
+  (get) => {
+    const testId = get(currentTestIdAtom);
+
+    return get(testAnswersAtom(testId));
+  },
+  (
+    get,
+    set,
+    value: {
+      [key: number]: number | undefined;
+    },
+  ) => {
+    const testId = get(currentTestIdAtom);
+
+    set(testAnswersAtom(testId), value);
+  },
+);
+
+export const currentTestFinishedAtom = atom(
+  (get) => {
+    const testId = get(currentTestIdAtom);
+
+    return get(testFinishedAtom(testId));
+  },
+  (get, set, value: boolean) => {
+    const testId = get(currentTestIdAtom);
+
+    set(testFinishedAtom(testId), value);
+  },
+);
+
+export const currentTestResult = atom((get) => {
+  const isFinished = get(currentTestFinishedAtom);
+
+  if (!isFinished) return undefined;
+
+  const answers = get(currentTestAnswersAtom);
+
+  const testLoadable = get(loadable(currentTestAtom));
+
+  if (testLoadable.state !== 'hasData') return {};
+
+  return Object.entries(answers).reduce<{ [index: number]: boolean }>(
+    (result, [qIndex, answer]) => {
+      result[+qIndex] =
+        answer === testLoadable.data.questions[+qIndex - 1]?.answer;
+
+      return result;
+    },
+    {},
+  );
+});
+
+export const currentTestGradeAtom = atom((get) => {
+  const isFinished = get(currentTestFinishedAtom);
+
+  if (!isFinished) return undefined;
+
+  const testResult = get(currentTestResult);
+  const result = get(loadable(currentTestAtom));
+
+  if (result.state !== 'hasData') return undefined;
+
+  return result.data.questions.reduce((grade, q, index) => {
+    if (testResult?.[index + 1]) {
+      return grade + q.points;
+    }
+
+    return grade;
+  }, 0);
+});
+
+export const currentTestQuestionsCount = atom(async (get) => {
+  const { questions } = await get(currentTestAtom);
+
+  return questions.length;
+});
+
+export const currentTestAnswered = atom((get) => {
+  const questionsCount = get(loadable(currentTestQuestionsCount));
+  const answers = get(currentTestAnswersAtom);
+
+  if (questionsCount.state !== 'hasData') return false;
+
+  return questionsCount.data === Object.keys(answers).length;
+});

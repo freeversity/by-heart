@@ -1,16 +1,12 @@
-import { styled } from '@linaria/react';
-import { Button } from 'primereact/button';
-import { type FC, useState } from 'react';
-import { Colors } from '../../consts/colors';
+import { type FC, Suspense, useState } from 'react';
+import { QuestionAudioSubs } from '../QuestionAudioSubs/QuestionAudioSubs';
 
 export const QuestionAudio: FC<{
   subPath: string | null;
   src: string;
   subsOpen: boolean;
-  subs: string | null;
-}> = ({ src, subPath, subsOpen, subs }) => {
+}> = ({ src, subPath, subsOpen }) => {
   const [cueText, setCueText] = useState('');
-  const [fullSubs, setSubsFull] = useState(false);
 
   return (
     <div>
@@ -40,42 +36,10 @@ export const QuestionAudio: FC<{
         )}
       </audio>
       {subPath && subsOpen && (
-        <div>
-          Subtitles:
-          <Subtitles>
-            <FullSubBtn
-              size="small"
-              className={`pi ${fullSubs ? 'pi-chevron-down' : 'pi-chevron-up'}`}
-              onClick={() => {
-                setSubsFull((show) => !show);
-              }}
-              severity="secondary"
-              rounded
-            />
-            <pre>{fullSubs ? subs : cueText}</pre>
-          </Subtitles>
-        </div>
+        <Suspense>
+          <QuestionAudioSubs cueText={cueText} />
+        </Suspense>
       )}
     </div>
   );
 };
-
-const Subtitles = styled.div`
-  position: relative;
-  min-height: 40px;
-  border: 1px solid ${Colors.gray[2]};
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const FullSubBtn = styled(Button)`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-
-  .p-button-label {
-    display: none;
-  }
-`;

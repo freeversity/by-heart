@@ -1,15 +1,25 @@
 import { type FC, useEffect, useState } from 'react';
+import { useRefCallback } from '../../hooks/useRefCallback';
 import { formatDuration } from '../../utils/formatDuration';
 
 export const Countdown: FC<{
   className?: string;
   timeout: number;
   onTimeout?: () => void;
-}> = ({ className, timeout }) => {
+}> = ({ className, timeout, onTimeout = () => {} }) => {
   const [start, setStart] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
 
+  const handleTimeout = useRefCallback(onTimeout);
+
+  const isTimedOut = start + timeout <= now;
+
   useEffect(() => {
+    if (isTimedOut) {
+      handleTimeout();
+      return;
+    }
+
     const now = Date.now();
 
     setStart(now);
@@ -30,7 +40,7 @@ export const Countdown: FC<{
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [isTimedOut, handleTimeout]);
 
   const delta = timeout + (start - now);
 

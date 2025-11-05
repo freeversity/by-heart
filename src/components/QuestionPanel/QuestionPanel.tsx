@@ -1,51 +1,47 @@
 import { styled } from '@linaria/react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { Button } from 'primereact/button';
-import { type FC, Fragment, useState } from 'react';
-import Markdown from 'react-markdown';
-import remark from 'remark-gfm';
-import type { Question } from '../../api/tests';
+import { type FC, Suspense } from 'react';
 import { Colors } from '../../consts/colors';
 import {
+  currentQuestionIndexAtom,
+  currentTestAnswered,
+  currentTestFinishedAtom,
   currentTestQuestionAtom,
-  currentTestTextAtom,
 } from '../../state/currentTest/atoms';
 import { QuestionAudio } from '../QuestionAudio/QuestionAudio';
+import { QuestionText } from '../QuestionText/QuestionText';
 
 export const QuestionPanel: FC<{
   testId: string;
-  question: Question;
-  index: number;
   answer: number | undefined;
   onAnswer: (q: number, option: number) => void;
   onNext?: () => void;
   onPrev?: () => void;
   onFinish?: () => void;
-  correctAnswer?: number;
-}> = ({
-  testId,
-  question,
-  index: qIndex,
-  onAnswer,
-  answer,
-  onNext,
-  onPrev,
-  onFinish,
-  correctAnswer,
-}) => {
-  const qText = useAtomValue(
-    currentTestTextAtom({ index: qIndex, id: testId }),
-  );
+  onRetry?: () => void;
+}> = ({ testId, onAnswer, answer, onNext, onPrev, onFinish, onRetry }) => {
+  const qIndex = useAtomValue(currentQuestionIndexAtom);
 
-  const { points } =
-    useAtomValue(currentTestQuestionAtom({ index: qIndex, id: testId })) ?? {};
+  const isFinished = useAtomValue(currentTestFinishedAtom);
+
+  const {
+    points,
+    images,
+    audio,
+    options,
+    text,
+    answer: correctAnswer,
+  } = useAtomValue(currentTestQuestionAtom) ?? {};
+
+  const isAllAnswered = useAtomValue(currentTestAnswered);
 
   return (
     <div>
       <Heading>
         Question #{qIndex} ({points} points)
       </Heading>
-      {question?.images?.map((imgUrl, index) => (
+      {images?.map((imgUrl, index) => (
         <Img
           // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
           key={index}
@@ -53,38 +49,37 @@ export const QuestionPanel: FC<{
           alt="blah"
         />
       ))}
-      {qText && !question.audio && (
-        <Markdown remarkPlugins={[remark]}>{qText}</Markdown>
+      {!audio && !!text && (
+        <Suspense>
+          <QuestionText />
+        </Suspense>
       )}
-      {question?.audio?.map((src, index) => (
+      {audio?.map((src, index) => (
         <QuestionAudio
           // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
           key={`${src}-${index}`}
           src={`https://cdn.freeversity.io/tests/${testId}/${src}`}
-          subPath={`https://cdn.freeversity.io/tests/${testId}/${question.text}`}
-          subs={qText}
-          subsOpen={correctAnswer !== undefined}
+          subPath={`https://cdn.freeversity.io/tests/${testId}/${text}`}
+          subsOpen={isFinished}
         />
       ))}
       <Answers>
-        {question?.options.map((option, index) => (
+        {options?.map((option, index) => (
           <Answer
             // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={index}
-            data-correct={correctAnswer === index}
+            data-correct={isFinished && correctAnswer === index}
             data-incorrect={
-              correctAnswer !== undefined &&
-              correctAnswer !== index &&
-              answer === index
+              isFinished && correctAnswer !== index && answer === index
             }
           >
             <AnswerLabel>
               <Option
-                name={question.index}
+                name={`${index}`}
                 type="radio"
                 value={index}
                 checked={answer === index}
-                disabled={correctAnswer !== undefined}
+                disabled={isFinished}
                 onChange={() => {
                   onAnswer(qIndex, index);
                 }}
@@ -94,9 +89,19 @@ export const QuestionPanel: FC<{
           </Answer>
         ))}
       </Answers>
-      {onPrev && <Button onClick={onPrev}>Prev</Button>}
-      {onNext && <Button onClick={onNext}>Next</Button>}
-      {onFinish && <Button onClick={onFinish}>Finish</Button>}
+      <Footer>
+        {onPrev && <Button onClick={onPrev}>Prev</Button>}
+        {onNext && <Button onClick={onNext}>Next</Button>}
+        {onFinish && (
+          <Button
+            severity={isAllAnswered ? 'success' : 'danger'}
+            onClick={onFinish}
+          >
+            Finish
+          </Button>
+        )}
+        {onRetry && <Button onClick={onRetry}>Retry</Button>}
+      </Footer>
     </div>
   );
 };
@@ -118,6 +123,13 @@ const Answers = styled.ul`
   max-width: 600px;
   list-style: none;
   text-align: left;
+`;
+
+const Footer = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Answer = styled.li`

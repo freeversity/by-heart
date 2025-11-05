@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import { useAtom } from 'jotai';
 import { db } from '../../db';
 import { Status } from '../../db/db';
-import { currentListAtom } from '../../state/currentList/atoms';
+import { currentListAtom, currentListDef } from '../../state/currentList/atoms';
 import { formatDuration } from '../../utils/formatDuration';
 
 Chart.register(...registerables);
@@ -19,7 +19,7 @@ export const DurationChart: FC<{
   listId: string;
   className?: string;
 }> = ({ mode, subj, listId, className }) => {
-  const [list] = useAtom(currentListAtom({ subj, id: listId }));
+  const [list] = useAtom(currentListDef({ subj, id: listId }));
 
   const today = useMemo(() => {
     const now = new Date();
@@ -248,6 +248,6 @@ export const DurationChart: FC<{
   );
 };
 
-const Container = styled.div`   
-    max-height: 500px;
+const Container = styled.div`
+  max-height: 500px;
 `;

@@ -13,7 +13,7 @@ import { Colors } from '../../consts/colors';
 import { db } from '../../db';
 import { useRefCallback } from '../../hooks/useRefCallback';
 import { useListId, useSubj } from '../../hooks/useSubj';
-import { currentListAtom } from '../../state/currentList/atoms';
+import { currentListDef } from '../../state/currentList/atoms';
 import { normalizeString } from '../../utils/normilize';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FlashCard } from '../FlashCard';
@@ -46,7 +46,7 @@ export const SpellingGame: FC = () => {
 
   const [isFlipped, setFlipped] = useState(false);
   const [showFull, setShowFull] = useState(false);
-  const [list] = useAtom(currentListAtom({ subj, id: listId }));
+  const [list] = useAtom(currentListDef({ subj, id: listId }));
 
   const nextBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -318,48 +318,48 @@ export const SpellingGame: FC = () => {
 };
 
 const Content = styled(Flex)`
-    gap: 20px;
-    flex-direction: column;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    flex-grow: 1;
-    padding-bottom: 40px;
+  gap: 20px;
+  flex-direction: column;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
+  padding-bottom: 40px;
 `;
 
 const DefCard = styled(Card)`
-    width: fit-content;
-    min-width: 300px;
+  width: fit-content;
+  min-width: 300px;
 `;
 
 const FlashCardContent = styled(FlashCard)`
-    width: 300px;
-    margin: 0 auto;
-    margin-bottom: 20px;
+  width: 300px;
+  margin: 0 auto;
+  margin-bottom: 20px;
 `;
 
 const FlippedCardWrapper = styled(Card)`
-    max-width: 600px;
-    width: 100%;
+  max-width: 600px;
+  width: 100%;
 `;
 const FlippedCardContent = styled(FlippedCard)`
-    width: 100%;
+  width: 100%;
 `;
 
 const FullInfoCard = styled(FlippedCard)`
-    width: 100%;
-    margin-bottom: 50px;
+  width: 100%;
+  margin-bottom: 50px;
 `;
 
 const CloseDrawerButton = styled(Button)`
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const STimer = styled(Timer)`
-    margin: 5px 0;
+  margin: 5px 0;
 `;
 
 const Form = styled.form`
@@ -386,5 +386,5 @@ const TypeLabel = styled(Typography.Text)`
 `;
 
 const History = styled(TermStatusHistory)`
-    width: 100%;
+  width: 100%;
 `;

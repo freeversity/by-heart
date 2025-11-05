@@ -16,7 +16,7 @@ export const TestResult: FC<{ className?: string; grade: number }> = ({
 
   if (!testId) throw new Error('No test id');
 
-  const { benchmarks } = useAtomValue(currentTestAtom(testId));
+  const { benchmarks } = useAtomValue(currentTestAtom);
 
   return (
     <div className={className}>
