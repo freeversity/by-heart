@@ -71,7 +71,7 @@ export const ListeningTest: FC = () => {
                 });
               }}
               onNext={
-                qIndex < test.questions.length
+                test && qIndex < test.questions.length
                   ? () => {
                       setSearchParams(`${qIndex + 1}`);
                     }

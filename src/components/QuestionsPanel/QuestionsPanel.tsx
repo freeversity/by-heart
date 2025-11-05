@@ -24,7 +24,7 @@ export const QuestionsPanel: FC<{
 
   const qIndex = +qParam;
 
-  const { questions, timeout } = useAtomValue(currentTestAtom);
+  const { questions, timeout } = useAtomValue(currentTestAtom) ?? {};
 
   const aswers = useAtomValue(currentTestAnswersAtom);
 
@@ -38,7 +38,7 @@ export const QuestionsPanel: FC<{
       )}
 
       <QuestionsNav className={className}>
-        {questions.map((_q, index) => (
+        {questions?.map((_q, index) => (
           <QuestionsNavItem
             data-active={qIndex === index + 1}
             data-status={`${index + 1}` in aswers ? 'answered' : undefined}
@@ -57,7 +57,7 @@ export const QuestionsPanel: FC<{
           </QuestionsNavItem>
         ))}
       </QuestionsNav>
-      {grade === undefined && (
+      {grade === undefined && !!timeout && (
         <Countdown timeout={timeout * 1000} onTimeout={onTimeout} />
       )}
     </>

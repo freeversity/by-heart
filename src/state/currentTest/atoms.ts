@@ -65,7 +65,7 @@ export const currentTestIdAtom = selectAtom(locationAtom, ({ pathname }) => {
   const testId =
     matchReading?.params.testId ?? matchListening?.params?.testId ?? null;
 
-  if (!testId) throw new Error('Test id is not valid');
+  if (!testId) return null;
 
   return testId;
 });
@@ -82,6 +82,8 @@ export const currentQuestionIndexAtom = selectAtom(
 export const currentTestAtom = atom((get) => {
   const testId = get(currentTestIdAtom);
 
+  if (!testId) return null;
+
   return get(testAtom(testId));
 });
 
@@ -91,12 +93,14 @@ export const currentTestQuestionAtom = atom((get) => {
 
   if (result.state !== 'hasData') return undefined;
 
-  return result.data.questions[qIndex - 1];
+  return result.data?.questions[qIndex - 1];
 });
 
 export const currentTestAnswersAtom = atom(
   (get) => {
     const testId = get(currentTestIdAtom);
+
+    if (!testId) return {};
 
     return get(testAnswersAtom(testId));
   },
@@ -109,6 +113,7 @@ export const currentTestAnswersAtom = atom(
   ) => {
     const testId = get(currentTestIdAtom);
 
+    if (!testId) return null;
     set(testAnswersAtom(testId), value);
   },
 );
@@ -117,11 +122,14 @@ export const currentTestFinishedAtom = atom(
   (get) => {
     const testId = get(currentTestIdAtom);
 
+    if (!testId) return false;
+
     return get(testFinishedAtom(testId));
   },
   (get, set, value: boolean) => {
     const testId = get(currentTestIdAtom);
 
+    if (!testId) return null;
     set(testFinishedAtom(testId), value);
   },
 );
@@ -140,7 +148,7 @@ export const currentTestResult = atom((get) => {
   return Object.entries(answers).reduce<{ [index: number]: boolean }>(
     (result, [qIndex, answer]) => {
       result[+qIndex] =
-        answer === testLoadable.data.questions[+qIndex - 1]?.answer;
+        answer === testLoadable.data?.questions[+qIndex - 1]?.answer;
 
       return result;
     },
@@ -158,7 +166,7 @@ export const currentTestGradeAtom = atom((get) => {
 
   if (result.state !== 'hasData') return undefined;
 
-  return result.data.questions.reduce((grade, q, index) => {
+  return result.data?.questions.reduce((grade, q, index) => {
     if (testResult?.[index + 1]) {
       return grade + q.points;
     }
@@ -168,9 +176,9 @@ export const currentTestGradeAtom = atom((get) => {
 });
 
 export const currentTestQuestionsCount = atom(async (get) => {
-  const { questions } = await get(currentTestAtom);
+  const test = await get(currentTestAtom);
 
-  return questions.length;
+  return test?.questions.length;
 });
 
 export const currentTestAnswered = atom((get) => {

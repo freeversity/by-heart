@@ -14,6 +14,8 @@ export const QuestionText: FC<{
   const qIndex = useAtomValue(currentQuestionIndexAtom);
   const testId = useAtomValue(currentTestIdAtom);
 
+  if (!testId) throw new Error('Test id is not valid');
+
   const qText = useAtomValue(
     testQuestionTextAtom({ testId, questionIndex: qIndex }),
   );

@@ -17,6 +17,8 @@ export const QuestionAudioSubs: FC<{
   const testId = useAtomValue(currentTestIdAtom);
   const qIndex = useAtomValue(currentQuestionIndexAtom);
 
+  if (!testId) throw new Error('Test id is not valid');
+
   const subs = useAtomValue(
     testQuestionTextAtom({ testId, questionIndex: qIndex }),
   );

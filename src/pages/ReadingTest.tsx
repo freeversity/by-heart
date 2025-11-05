@@ -35,7 +35,7 @@ export const ReadingTest: FC = () => {
 
   const [answers, setAnswers] = useAtom(currentTestAnswersAtom);
   const [isFinished, setFinished] = useAtom(currentTestFinishedAtom);
-  const { questions, timeout } = useAtomValue(currentTestAtom);
+  const { questions } = useAtomValue(currentTestAtom) ?? {};
   const isAllAnswered = useAtomValue(currentTestAnswered);
 
   return (
@@ -67,7 +67,7 @@ export const ReadingTest: FC = () => {
               });
             }}
             onNext={
-              qIndex < questions.length
+              questions && qIndex < questions?.length
                 ? () => {
                     setSearchParams(`${qIndex + 1}`);
                   }
