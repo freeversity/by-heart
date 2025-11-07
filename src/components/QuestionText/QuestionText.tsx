@@ -1,24 +1,13 @@
-import { useAtomValue } from 'jotai';
 import type { FC } from 'react';
 import Markdown from 'react-markdown';
 import remark from 'remark-gfm';
-import {
-  currentQuestionIndexAtom,
-  currentTestIdAtom,
-  testQuestionTextAtom,
-} from '../../state/currentTest/atoms';
+import { useQuestionAtomValue } from '../../hooks/useQuestionIndex';
+import { testQuestionTextAtom } from '../../state/tests/testsAtoms';
 
 export const QuestionText: FC<{
   className?: string;
 }> = ({ className }) => {
-  const qIndex = useAtomValue(currentQuestionIndexAtom);
-  const testId = useAtomValue(currentTestIdAtom);
-
-  if (!testId) throw new Error('Test id is not valid');
-
-  const qText = useAtomValue(
-    testQuestionTextAtom({ testId, questionIndex: qIndex }),
-  );
+  const qText = useQuestionAtomValue(testQuestionTextAtom);
 
   return (
     <div className={className}>

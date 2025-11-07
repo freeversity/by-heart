@@ -1,30 +1,36 @@
 import { styled } from '@linaria/react';
-import { useAtomValue } from 'jotai';
 import { Button } from 'primereact/button';
 import { type FC, Suspense } from 'react';
 import { Colors } from '../../consts/colors';
 import {
-  currentQuestionIndexAtom,
-  currentTestAnswered,
-  currentTestFinishedAtom,
-  currentTestQuestionAtom,
-} from '../../state/currentTest/atoms';
+  useQuestionAtom,
+  useQuestionAtomValue,
+  useQuestionIndexParam,
+} from '../../hooks/useQuestionIndex';
+import { useTestAtom, useTestAtomValue } from '../../hooks/useTestId';
+import {
+  testActiveTryAnswered,
+  testActiveTryFinished,
+  testActiveTryQuestionAnswer,
+} from '../../state/tests/testActiveTryAtoms';
+import {
+  testPaused,
+  testQuestionAtom,
+  testQuestionsCount,
+} from '../../state/tests/testsAtoms';
 import { QuestionAudio } from '../QuestionAudio/QuestionAudio';
 import { QuestionText } from '../QuestionText/QuestionText';
 
 export const QuestionPanel: FC<{
   testId: string;
-  answer: number | undefined;
-  onAnswer: (q: number, option: number) => void;
-  onNext?: () => void;
-  onPrev?: () => void;
-  onFinish?: () => void;
-  onRetry?: () => void;
-}> = ({ testId, onAnswer, answer, onNext, onPrev, onFinish, onRetry }) => {
-  const qIndex = useAtomValue(currentQuestionIndexAtom);
+  onFinish: () => void;
+  onRetry: () => void;
+}> = ({ testId, onFinish, onRetry }) => {
+  const [qIndex, setQIndex] = useQuestionIndexParam();
 
-  const isFinished = useAtomValue(currentTestFinishedAtom);
-
+  const isFinished = useTestAtomValue(testActiveTryFinished);
+  const [answer, setAnswer] = useQuestionAtom(testActiveTryQuestionAnswer);
+  const questionsCount = useTestAtomValue(testQuestionsCount);
   const {
     points,
     images,
@@ -32,79 +38,138 @@ export const QuestionPanel: FC<{
     options,
     text,
     answer: correctAnswer,
-  } = useAtomValue(currentTestQuestionAtom) ?? {};
+  } = useQuestionAtomValue(testQuestionAtom) ?? {};
+  const isAllAnswered = useTestAtomValue(testActiveTryAnswered);
 
-  const isAllAnswered = useAtomValue(currentTestAnswered);
+  const [isPaused, setPaused] = useTestAtom(testPaused);
 
   return (
     <div>
-      <Heading>
-        Question #{qIndex} ({points} points)
-      </Heading>
-      {images?.map((imgUrl, index) => (
-        <Img
-          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-          key={index}
-          src={`https://cdn.freeversity.io/tests/${testId}/${imgUrl}`}
-          alt="blah"
-        />
-      ))}
-      {!audio && !!text && (
-        <Suspense>
-          <QuestionText />
-        </Suspense>
+      {isPaused && !isFinished && (
+        <PauseWarning>
+          <p>The test is paused. Would you like to proceed?</p>
+          <Button
+            onClick={() => {
+              setPaused(false);
+            }}
+          >
+            Continue test
+          </Button>
+        </PauseWarning>
       )}
-      {audio?.map((src, index) => (
-        <QuestionAudio
-          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-          key={`${src}-${index}`}
-          src={`https://cdn.freeversity.io/tests/${testId}/${src}`}
-          subPath={`https://cdn.freeversity.io/tests/${testId}/${text}`}
-          subsOpen={isFinished}
-        />
-      ))}
-      <Answers>
-        {options?.map((option, index) => (
-          <Answer
+
+      <QuestionContent data-paused={isPaused && !isFinished}>
+        <Heading>
+          Question #{qIndex} ({points} points)
+        </Heading>
+        {images?.map((imgUrl, index) => (
+          <Img
             // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={index}
-            data-correct={isFinished && correctAnswer === index}
-            data-incorrect={
-              isFinished && correctAnswer !== index && answer === index
-            }
-          >
-            <AnswerLabel>
-              <Option
-                name={`${index}`}
-                type="radio"
-                value={index}
-                checked={answer === index}
-                disabled={isFinished}
-                onChange={() => {
-                  onAnswer(qIndex, index);
-                }}
-              />
-              {option}
-            </AnswerLabel>
-          </Answer>
+            src={`https://cdn.freeversity.io/tests/${testId}/${imgUrl}`}
+            alt="blah"
+          />
         ))}
-      </Answers>
-      <Footer>
-        {onPrev && <Button onClick={onPrev}>Prev</Button>}
-        {onNext && <Button onClick={onNext}>Next</Button>}
-        {onFinish && (
-          <Button
-            severity={isAllAnswered ? 'success' : 'danger'}
-            onClick={onFinish}
-          >
-            Finish
-          </Button>
+        {!audio && !!text && (
+          <Suspense>
+            <QuestionText />
+          </Suspense>
         )}
-        {onRetry && <Button onClick={onRetry}>Retry</Button>}
-      </Footer>
+        {audio?.map((src, index) => (
+          <QuestionAudio
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+            key={`${src}-${index}`}
+            src={`https://cdn.freeversity.io/tests/${testId}/${src}`}
+            subPath={`https://cdn.freeversity.io/tests/${testId}/${text}`}
+            subsOpen={isFinished}
+          />
+        ))}
+        <Answers>
+          {options?.map((option, index) => (
+            <Answer
+              // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              key={index}
+              data-correct={isFinished && correctAnswer === index}
+              data-incorrect={
+                isFinished && correctAnswer !== index && answer === index
+              }
+            >
+              <AnswerLabel>
+                <Option
+                  name={`${index}`}
+                  type="radio"
+                  value={index}
+                  checked={answer === index}
+                  disabled={isFinished}
+                  onChange={() => {
+                    setAnswer(index);
+                  }}
+                />
+                {option}
+              </AnswerLabel>
+            </Answer>
+          ))}
+        </Answers>
+      </QuestionContent>
+      {!isPaused && (
+        <Footer>
+          {qIndex > 1 && (
+            <Button
+              onClick={() => {
+                setQIndex(qIndex - 1);
+              }}
+            >
+              Prev
+            </Button>
+          )}
+          {qIndex < questionsCount && (
+            <Button
+              onClick={() => {
+                setQIndex(qIndex + 1);
+              }}
+            >
+              Next
+            </Button>
+          )}
+          {!isFinished && (
+            <Button
+              severity={isAllAnswered ? 'success' : 'danger'}
+              onClick={onFinish}
+            >
+              Finish
+            </Button>
+          )}
+          {isFinished && <Button onClick={onRetry}>Retry</Button>}
+        </Footer>
+      )}
     </div>
   );
 };
+
+const PauseWarning = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+`;
+
+const QuestionContent = styled.div`
+  position: relative;
+
+  &[data-paused="true"] {
+    filter: blur(5px);
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+`;
 
 const Heading = styled.h2`
   font-size: 18px;

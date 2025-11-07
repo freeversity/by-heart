@@ -1,27 +1,16 @@
 import { styled } from '@linaria/react';
-import { useAtomValue } from 'jotai';
 import { Button } from 'primereact/button';
 import { type FC, useState } from 'react';
 import { Colors } from '../../consts/colors';
-import {
-  currentQuestionIndexAtom,
-  currentTestIdAtom,
-  testQuestionTextAtom,
-} from '../../state/currentTest/atoms';
+import { useQuestionAtomValue } from '../../hooks/useQuestionIndex';
+import { testQuestionTextAtom } from '../../state/tests/testsAtoms';
 
 export const QuestionAudioSubs: FC<{
   cueText: string;
 }> = ({ cueText }) => {
   const [fullSubs, setSubsFull] = useState(false);
 
-  const testId = useAtomValue(currentTestIdAtom);
-  const qIndex = useAtomValue(currentQuestionIndexAtom);
-
-  if (!testId) throw new Error('Test id is not valid');
-
-  const subs = useAtomValue(
-    testQuestionTextAtom({ testId, questionIndex: qIndex }),
-  );
+  const subs = useQuestionAtomValue(testQuestionTextAtom);
 
   return (
     <div>

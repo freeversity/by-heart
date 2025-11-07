@@ -1,54 +1,63 @@
-import { type FC, useEffect, useState } from 'react';
+import { type FC, useEffect, useRef, useState } from 'react';
 import { useRefCallback } from '../../hooks/useRefCallback';
+import { useRefValue } from '../../hooks/useRefValue';
 import { formatDuration } from '../../utils/formatDuration';
 
 export const Countdown: FC<{
   className?: string;
   timeout: number;
   onTimeout?: () => void;
-}> = ({ className, timeout, onTimeout = () => {} }) => {
-  const [start, setStart] = useState(() => Date.now());
-  const [now, setNow] = useState(() => Date.now());
+  onTick?: (timeout: number, delta: number) => void;
+  isPaused?: boolean;
+}> = ({
+  className,
+  timeout: initialTimeout,
+  onTimeout = () => {},
+  onTick = () => {},
+  isPaused,
+}) => {
+  const [timeout, setTimeLeft] = useState(initialTimeout);
 
   const handleTimeout = useRefCallback(onTimeout);
+  const handleTick = useRefCallback(onTick);
 
-  const isTimedOut = start + timeout <= now;
+  const isTimedOut = timeout <= 0;
+
+  const timeoutRef = useRefValue(timeout);
+  const nowRef = useRef(Date.now());
 
   useEffect(() => {
+    if (isPaused) return;
+
     if (isTimedOut) {
       handleTimeout();
       return;
     }
 
-    const now = Date.now();
-
-    setStart(now);
-    setNow(now);
+    nowRef.current = Date.now();
 
     const timer = setInterval(() => {
-      setNow((prevNow) => {
-        const now = Date.now();
+      const now = Date.now();
 
-        if (now - prevNow < 5000) {
-          return now;
-        }
+      const delta = now - nowRef.current;
+      const timeout = timeoutRef.current - delta;
 
-        return prevNow;
-      });
+      nowRef.current = now;
+      setTimeLeft(timeout);
+
+      handleTick(timeout, delta);
     }, 500);
 
     return () => {
       clearInterval(timer);
     };
-  }, [isTimedOut, handleTimeout]);
+  }, [isPaused, isTimedOut, handleTimeout, handleTick, timeoutRef]);
 
-  const delta = timeout + (start - now);
-
-  const { h, m, s } = formatDuration(delta);
+  const { h, m, s } = formatDuration(timeout);
 
   return (
     <div className={className}>
-      {!!h && <span>{h}:</span>}
+      {!!+h && <span>{h}:</span>}
       <span>{m}:</span>
       <span>{s}</span>
     </div>

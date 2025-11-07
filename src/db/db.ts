@@ -51,6 +51,23 @@ export interface GameDurationEvent {
   listId: string;
   duration: number;
 }
+export interface TestEvent {
+  testId: string;
+  tryId: string;
+  qIndex: number;
+  answer: number;
+  created: number;
+  updated: number;
+}
+export interface TestTry {
+  testId: string;
+  tryId: string;
+  grade: number | null;
+  timeLeft: number;
+  created: number;
+  updated: number;
+  finished: number | null;
+}
 
 export const db = new Dexie('lists') as Dexie & {
   lists: EntityTable<ListTerm>;
@@ -58,11 +75,15 @@ export const db = new Dexie('lists') as Dexie & {
   progress: EntityTable<DefProgressEvent, 'id'>;
   statuses: EntityTable<DefStatus>;
   durations: EntityTable<GameDurationEvent, 'id'>;
+  testEvents: EntityTable<TestEvent>;
+  testTries: EntityTable<TestTry, 'tryId'>;
 };
 
-db.version(2).stores({
+db.version(3).stores({
   lists: '[subj+term+list]',
   terms: '[subj+term+def]',
+  testEvents: '[testId+tryId+qIndex], testId, tryId, qIndex, answer, timestamp',
+  testTries: '[testId+tryId], testId, tryId, grade, timestamp',
   progress: '++id, subj, def, status, timestamp, mode, term, lemma, type',
   statuses:
     '[subj+mode+term+def+type], status, term, timestamp, subj, def, mode, lemma, type',
