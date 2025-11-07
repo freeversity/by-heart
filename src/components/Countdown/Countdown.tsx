@@ -1,25 +1,26 @@
-import { type FC, useEffect, useRef, useState } from 'react';
+import { type FC, useEffect, useRef } from 'react';
 import { useRefCallback } from '../../hooks/useRefCallback';
 import { useRefValue } from '../../hooks/useRefValue';
+import { useTestAtom } from '../../hooks/useTestId';
+import { testActiveTryTimeout } from '../../state/tests/testActiveTryAtoms';
 import { formatDuration } from '../../utils/formatDuration';
 
 export const Countdown: FC<{
   className?: string;
   timeout: number;
   onTimeout?: () => void;
-  onTick?: (timeout: number, delta: number) => void;
   isPaused?: boolean;
 }> = ({
   className,
   timeout: initialTimeout,
   onTimeout = () => {},
-  onTick = () => {},
   isPaused,
 }) => {
-  const [timeout, setTimeLeft] = useState(initialTimeout);
+  const [timeoutS, updateTimeout] = useTestAtom(testActiveTryTimeout);
 
   const handleTimeout = useRefCallback(onTimeout);
-  const handleTick = useRefCallback(onTick);
+
+  const timeout = (timeoutS ?? initialTimeout) * 1000;
 
   const isTimedOut = timeout <= 0;
 
@@ -43,15 +44,14 @@ export const Countdown: FC<{
       const timeout = timeoutRef.current - delta;
 
       nowRef.current = now;
-      setTimeLeft(timeout);
 
-      handleTick(timeout, delta);
+      updateTimeout(timeout / 1000);
     }, 500);
 
     return () => {
       clearInterval(timer);
     };
-  }, [isPaused, isTimedOut, handleTimeout, handleTick, timeoutRef]);
+  }, [isPaused, isTimedOut, handleTimeout, updateTimeout, timeoutRef]);
 
   const { h, m, s } = formatDuration(timeout);
 
